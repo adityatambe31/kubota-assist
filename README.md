@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IT Support Chatbot Prototype – Project Documentation
 
-## Getting Started
+## 1. Overview
+The IT Support Chatbot is a prototype web-based tool designed to reduce IT support workload by providing users with self-service solutions before raising a support ticket.
 
-First, run the development server:
+- **Goal:** Allow employees to quickly resolve common IT issues by retrieving solutions from the IT handbook database.
+- **Fallback:** If the issue is not resolved, the bot redirects the user to Jira for ticket creation.
+- **Future:** Potential integration with Gemini AI for improved natural query handling, and ServiceNow as an additional ticketing option.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 2. Architecture Components
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Frontend
+- **Framework:** Next.js (React, TailwindCSS, shadcn components).
+- **Hosting:** Hosted on Vercel.
+- **User Interaction:** User interacts through a chat-style UI.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Backend
+- **Technology:** Node.js + TypeScript API.
+- **Functionality:** Handles requests from the frontend, fetches solutions from MongoDB, connects to Jira (and later ServiceNow), and has optional integration with the Gemini AI API.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database
+- **Type:** MongoDB Atlas.
+- **Purpose:** Stores IT Handbook solutions (FAQ entries).
+- **Security:** Encryption at rest enabled by default.
 
-## Learn More
+### Integrations
+- **Jira REST API:** For ticket creation.
+- **Gemini AI API:** Planned to help interpret natural queries.
+- **ServiceNow:** Future alternative ticketing system.
 
-To learn more about Next.js, take a look at the following resources:
+### Data Flow
+1. User enters a query in the chatbot UI.
+2. Frontend sends the query to the Backend API.
+3. Backend searches the MongoDB handbook database.
+4. If a solution is found, it is returned to the user.
+5. If no solution is found or the user is unsatisfied, the bot offers to create a ticket in Jira.
+6. (Optional future) Gemini AI API helps improve query matching.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 3. Tech Stack
+- **Frontend:** Next.js, React, TailwindCSS, shadcn UI.
+- **Backend:** Node.js, TypeScript.
+- **Database:** MongoDB Atlas.
+- **Hosting:** Vercel (Frontend + API).
+- **Integrations:** 
+  - Jira (REST API).
+  - Gemini AI API (Google AI Studio).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 4. Features (Prototype)
+- Search IT Handbook solutions from MongoDB.
+- Display solutions to users in the chatbot UI.
+- Redirect to Jira ticket creation if unresolved.
+- Secure communication over HTTPS.
 
-## Deploy on Vercel
+## 5. Setup & Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Local Setup
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Environment Variables
+- **MONGODB_URI:** MongoDB Atlas connection string.
+- **JIRA_API_KEY:** API key for Jira ticket creation.
+- **GEMINI_API_KEY:** (future) Gemini API key.
+
+### Deployment
+- Deploy frontend/backend via Vercel.
+- MongoDB Atlas handles database hosting.
+
+## 6. Security & Compliance
+- **Encryption:** HTTPS everywhere, MongoDB encryption at rest.
+- **Authentication:** No SSO in prototype (planned future integration with Google Workspace/Azure AD).
+- **Authorization:** Basic API key-based security.
+- **Audit Logging:** Not yet implemented.
+
+## 7. Limitations & Next Steps
+- No Single Sign-On (SSO) authentication yet.
+- No monitoring/logging.
+- Only Jira supported (ServiceNow in the future).
+- Gemini AI integration not fully built.
+
+## 8. Appendix
+- [Jira REST API docs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/)
+- [MongoDB Atlas docs](https://docs.atlas.mongodb.com/)
+- [Google Gemini API docs](https://developers.google.com/gemini)

@@ -11,8 +11,7 @@ We are currently maintaining security updates for the following versions:
 If you discover a security vulnerability, **please do not open a public issue**.  
 Instead, report it to us securely:
 
-- Email: [SECURITY-CONTACT-EMAIL]
-- (Optional) Encrypted channel: [Provide PGP key or other method]
+- Email: [tambeaditya22@gmail.com]
 
 ### Responsible Disclosure
 - Do not share details publicly until we have confirmed and released a fix.

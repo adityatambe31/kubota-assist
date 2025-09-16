@@ -14,6 +14,9 @@ import { HandbookEntry } from "@/lib/types";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
 import { TicketType } from "@/lib/models/ITIssue";
 
+const GREETING_MESSAGE =
+  "Hello! I'm your IT Support Assistant. How can I help you today?";
+
 interface TicketSuggestion {
   suggestTicket: boolean;
   ticketType?: TicketType;
@@ -26,18 +29,31 @@ interface SolutionFeedback {
   category?: TicketType;
 }
 
-interface ChatMessage {
-  role: "bot" | "user";
-  content: string;
-  solutions?: HandbookEntry[];
-  feedback?: SolutionFeedback;
-}
-
 export function ChatBot() {
-  const { messages, setMessages } = useChat();
+  const { messages, addMessage, initialize, updateActivity } = useChat();
   const [input, setInput] = useState("");
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Initialize chat on first render
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  // Main prompts data
+  const mainPrompts = [
+    { icon: "🔑", title: "Login / Password Reset" },
+    { icon: "💻", title: "New Laptop / Hardware / Software Request" },
+    { icon: "🌐", title: "VPN / Remote Access" },
+    {
+      icon: "📂",
+      title: "Application Issues (AS400, DealerLink, IBM Notes, etc.)",
+    },
+    { icon: "📧", title: "Email / Outlook" },
+    { icon: "🖨️", title: "Printer / Peripheral" },
+    { icon: "📞", title: "Microsoft Teams / Phone" },
+    { icon: "🔄", title: "Windows Updates / System Performance" },
+  ];
 
   // Add ref for messages container
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -87,7 +103,8 @@ export function ChatBot() {
       content: input.trim(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
+    updateActivity();
     setInput("");
     setIsLoading(true);
 
@@ -105,23 +122,18 @@ export function ChatBot() {
       });
 
       const data = await response.json();
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          content: data.message,
-          solutions: data.solutions,
-        },
-      ]);
+      addMessage({
+        role: "bot",
+        content: data.message,
+        solutions: data.solutions,
+      });
+      updateActivity();
     } catch (error) {
       console.error("Chat Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          content: "I'm sorry, I encountered an error. Please try again.",
-        },
-      ]);
+      addMessage({
+        role: "bot",
+        content: "I'm sorry, I encountered an error. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -173,6 +185,22 @@ export function ChatBot() {
       </ol>
     </div>
   );
+
+  const handleFeedback = (messageIndex: number, isHelpful: boolean) => {
+    if (isHelpful) {
+      addMessage({
+        role: "bot",
+        content: "Great! Is there anything else I can help you with?",
+      });
+    } else {
+      addMessage({
+        role: "bot",
+        content:
+          "I'm sorry the solution didn't help. Would you like to create a support ticket?",
+      });
+    }
+    updateActivity();
+  };
 
   const renderFeedback = (feedback: SolutionFeedback, messageIndex: number) => {
     if (!feedback.showFeedback) return null;
@@ -310,42 +338,74 @@ export function ChatBot() {
 
             {/* Messages section with icons */}
             <div className="flex-1 p-4 overflow-y-auto space-y-5">
-              {" "}
-              {/* Increased gap */}
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex items-start gap-3 ${
-                    // Increased gap
-                    msg.role === "bot" ? "justify-start" : "justify-end"
-                  }`}
-                >
-                  {msg.role === "bot" && (
+              {messages.length === 1 ? (
+                <div className="space-y-5">
+                  {/* Bot's initial greeting with profile pic */}
+                  <div className="flex items-start gap-3">
                     <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
                       <Bot className="h-5 w-5 text-white" />
                     </div>
-                  )}
+                    <div className="rounded-lg px-4 py-3 max-w-[85%] bg-gray-100">
+                      <p className="text-lg mb-2">👋 Hi, I'm here to help.</p>
+                      <p className="text-sm text-gray-600">
+                        Please select the issue that best matches your problem:
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Prompt buttons */}
+                  <div className="ml-11 space-y-2">
+                    {mainPrompts.map((prompt, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="w-full justify-start text-left hover:bg-orange-50 hover:border-orange-200 transition-colors"
+                        onClick={async () => {
+                          setInput(prompt.title);
+                          await handleSubmit(new Event("submit") as any);
+                          updateActivity();
+                        }}
+                      >
+                        <span className="mr-3 text-xl">{prompt.icon}</span>
+                        <span>{prompt.title}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                messages.map((msg, i) => (
                   <div
-                    className={`rounded-lg px-4 py-3 max-w-[85%] ${
-                      // Increased padding and max-width
+                    key={i}
+                    className={`flex items-start gap-3 ${
                       msg.role === "bot"
-                        ? "bg-gray-100 text-black"
-                        : "bg-orange-600 text-white"
+                        ? "justify-start"
+                        : "justify-end flex-row-reverse"
                     }`}
                   >
-                    {msg.content}
-                    {msg.solutions?.map((solution, i) =>
-                      renderSolution(solution)
+                    {msg.role === "bot" ? (
+                      <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
+                        <Bot className="h-5 w-5 text-white" />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <User className="h-5 w-5 text-gray-600" />
+                      </div>
                     )}
-                    {/* Render feedback */}
-                  </div>
-                  {msg.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="h-5 w-5 text-gray-600" />
+                    <div
+                      className={`rounded-lg px-4 py-3 max-w-[85%] ${
+                        msg.role === "bot"
+                          ? "bg-gray-100 text-black"
+                          : "bg-orange-600 text-white"
+                      }`}
+                    >
+                      {msg.content}
+                      {msg.solutions?.map((solution, i) =>
+                        renderSolution(solution)
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))
+              )}
               <div ref={messagesEndRef} /> {/* Add scroll anchor */}
             </div>
 

@@ -1,9 +1,9 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
-import { HandbookEntry } from "@/lib/types";
+import { type HandbookEntry } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 export default function ChatPage() {
@@ -58,7 +58,7 @@ export default function ChatPage() {
   // Handle feedback response
   const handleFeedbackResponse = (isResolved: boolean) => {
     setFeedbackRequested(false);
-    updateActivity(); // Update last activity timestamp
+    updateActivity();
 
     if (isResolved) {
       addMessage({
@@ -72,7 +72,6 @@ export default function ChatPage() {
           "I'm sorry the solution didn't help. Let me create a support ticket for you.",
       });
 
-      // Redirect to ticket page after a short delay
       setTimeout(() => {
         router.push("/ticket");
       }, 2000);
@@ -80,7 +79,7 @@ export default function ChatPage() {
   };
 
   const renderSolution = (solution: HandbookEntry) => (
-    <div className="bg-orange-50 rounded-lg p-3 mt-2">
+    <div className="bg-orange-50 rounded-lg p-3 mt-2" key={solution.title}>
       <h4 className="font-medium text-sm mb-2">{solution.title}</h4>
       <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
         {solution.solution.map((step, i) => (
@@ -90,35 +89,46 @@ export default function ChatPage() {
     </div>
   );
 
-  // Render feedback prompt
   const FeedbackPrompt = () => (
-    <div className="bg-gray-50 rounded-lg p-4 mt-4 border max-w-2xl mx-auto">
-      <p className="text-sm mb-3">Was this solution helpful?</p>
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={() => handleFeedbackResponse(true)}>
-          Yes, it helped
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => handleFeedbackResponse(false)}
-          className="text-orange-600 border-orange-600 hover:bg-orange-50"
-        >
-          No, create ticket
-        </Button>
+    <div className="flex items-start gap-3 w-full">
+      <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
+        <Bot className="h-5 w-5 text-white" />
+      </div>
+      <div className="flex-1 bg-white shadow-sm rounded-lg px-4 py-3">
+        <p className="text-sm mb-3 text-gray-700">Was this solution helpful?</p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handleFeedbackResponse(true)}
+            className="text-sm hover:bg-orange-50"
+          >
+            Yes, it helped
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleFeedbackResponse(false)}
+            className="text-sm text-orange-600 border-orange-600 hover:bg-orange-50"
+          >
+            No, create ticket
+          </Button>
+        </div>
       </div>
     </div>
   );
 
-  // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  // 🔥 Refactored handleSubmit
+  const handleSubmit = async (e?: React.FormEvent, presetInput?: string) => {
+    if (e) e.preventDefault();
+    const text = presetInput || input.trim();
+    if (!text || isLoading) return;
 
-    updateActivity(); // Update last activity timestamp
+    // Reset feedback state when sending a new message
+    setFeedbackRequested(false);
+    updateActivity();
 
     const userMessage: ChatMessage = {
       role: "user",
-      content: input.trim(),
+      content: text,
     };
 
     addMessage(userMessage);
@@ -130,23 +140,27 @@ export default function ChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: input.trim(),
+          message: text,
           context: messages,
         }),
       });
 
       const data = await response.json();
 
-      addMessage({
-        role: "bot",
+      const botMessage: ChatMessage = {
+        role: "bot" as const,
         content: data.message,
         solutions: data.solutions,
-      });
+      };
 
-      // Show feedback prompt after bot response
-      setTimeout(() => {
-        setFeedbackRequested(true);
-      }, 3000);
+      addMessage(botMessage);
+
+      // Only show feedback if there are solutions
+      if (data.solutions && data.solutions.length > 0) {
+        setTimeout(() => {
+          setFeedbackRequested(true);
+        }, 3000);
+      }
     } catch (error) {
       console.error("Chat Error:", error);
       addMessage({
@@ -173,10 +187,7 @@ export default function ChatPage() {
         <div className="container mx-auto max-w-4xl px-4 py-4 space-y-6">
           {messages.length === 1 ? (
             <PromptMenu
-              onSelect={(prompt) => {
-                setInput(prompt);
-                handleSubmit(new Event("submit") as any);
-              }}
+              onSelect={(prompt) => handleSubmit(undefined, prompt)}
             />
           ) : (
             messages.map((msg, i) => (
@@ -198,9 +209,10 @@ export default function ChatPage() {
                       : "bg-orange-600 text-white"
                   }`}
                 >
-                  {msg.content}
-                  {msg.solutions?.map((solution, i) =>
-                    renderSolution(solution)
+                  {msg.solutions && msg.solutions.length > 0 ? (
+                    msg.solutions.map((solution) => renderSolution(solution))
+                  ) : (
+                    <p>{msg.content}</p>
                   )}
                 </div>
                 {msg.role === "user" && (
@@ -208,11 +220,36 @@ export default function ChatPage() {
                     <User className="h-5 w-5 text-gray-600" />
                   </div>
                 )}
-                {msg.role === "bot" &&
-                  i === messages.length - 1 &&
-                  feedbackRequested && <FeedbackPrompt />}
               </div>
             ))
+          )}
+          {isLoading && (
+            <div className="flex items-start gap-3 max-w-2xl mx-auto">
+              <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
+                <Bot className="h-5 w-5 text-white" />
+              </div>
+              <div className="bg-white shadow-sm rounded-lg px-4 py-3">
+                <div className="flex gap-1">
+                  <div
+                    className="w-2 h-2 bg-gray-300 rounded-full animate-pulse"
+                    style={{ animationDelay: "0ms" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-gray-300 rounded-full animate-pulse"
+                    style={{ animationDelay: "200ms" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-gray-300 rounded-full animate-pulse"
+                    style={{ animationDelay: "400ms" }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          )}
+          {feedbackRequested && (
+            <div className="flex items-start gap-3 max-w-2xl mx-auto">
+              <FeedbackPrompt />
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
@@ -220,7 +257,7 @@ export default function ChatPage() {
 
       <footer className="sticky bottom-0 border-t bg-white p-4">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => handleSubmit(e)}
           className="container mx-auto max-w-4xl px-4"
         >
           <div className="flex gap-2 max-w-2xl mx-auto">
@@ -238,7 +275,20 @@ export default function ChatPage() {
               className="bg-orange-600 hover:bg-orange-700"
               disabled={isLoading}
             >
-              <Send className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+              {isLoading ? (
+                <div className="w-4 h-4 relative">
+                  <div
+                    className="w-1.5 h-1.5 rounded-full bg-white absolute animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  ></div>
+                  <div
+                    className="w-1.5 h-1.5 rounded-full bg-white absolute left-2 animate-bounce"
+                    style={{ animationDelay: "200ms" }}
+                  ></div>
+                </div>
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </form>

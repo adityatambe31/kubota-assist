@@ -1,26 +1,34 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { ITIssue } from "@/lib/models/ITIssue";
-import { TicketType } from "@/lib/types";
 import { SUPPORT_PROMPTS } from "@/lib/prompts";
+import { TicketType } from "@/lib/types";
+import { searchSolutions } from "@/lib/mongodb";
+import { explainSolution } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
     const { message, context = [] } = await req.json();
 
-    // Remove the initial greeting condition since it's handled by the store
-    if (context.length === 1) {
-      // Find matching solutions for the selected category
-      const solutions = await findSolutionsForCategory(message);
+    // Initial category selection
+    if (context.length === 0) {
+      const selectedCategory = SUPPORT_PROMPTS.find(
+        (cat) => cat.title === message
+      );
 
-      return NextResponse.json({
-        message: `Here are some solutions for ${message}:`,
-        solutions,
-      });
+      if (selectedCategory) {
+        return NextResponse.json({
+          message: "Please select your specific issue:",
+          solutions: selectedCategory.subPrompts.map((subPrompt) => ({
+            solution: [subPrompt.text],
+            category: selectedCategory.title,
+          })),
+          suggestTicket: false,
+        });
+      }
     }
 
-    // Find matching prompt category based on message
+    // Find matching category
     const matchingCategory = SUPPORT_PROMPTS.find((category) =>
       category.subPrompts.some((subPrompt) =>
         subPrompt.keywords.some((keyword) =>
@@ -29,40 +37,41 @@ export async function POST(req: Request) {
       )
     );
 
-    // Server-side mongoose query with category filter
-    const query = matchingCategory
-      ? {
-          $and: [
-            { $text: { $search: message } },
-            { category: matchingCategory.title },
-          ],
-        }
-      : { $text: { $search: message } };
+    // Determine category
+    let category: TicketType | undefined = Object.values(TicketType).find(
+      (type) => type === matchingCategory?.title
+    );
 
-    const solutions = await ITIssue.find(query, {
-      score: { $meta: "textScore" },
-    })
-      .sort({ score: { $meta: "textScore" } })
-      .limit(3)
-      .lean();
+    // Try getting category from context
+    if (!category && context.length > 0) {
+      const lastMessage = context[context.length - 1].content;
+      category = Object.values(TicketType).find(
+        (type) =>
+          type ===
+          SUPPORT_PROMPTS.find((cat) => cat.title === lastMessage)?.title
+      );
+    }
 
-    if (!solutions.length) {
+    // Search for solutions in database
+    const solutions = await searchSolutions(message, category);
+
+    if (solutions.length > 0) {
+      // Get AI explanation for the solutions
+      const explanation = await explainSolution(message, solutions, context);
+
       return NextResponse.json({
-        message: matchingCategory
-          ? `I understand you're having an issue with ${matchingCategory.title.toLowerCase()}. Would you like to create a support ticket?`
-          : "I couldn't find an exact match. Would you like to create a support ticket?",
-        solutions: [],
+        message: explanation,
+        solutions: solutions,
+        suggestTicket: false,
       });
     }
 
+    // No solutions found
     return NextResponse.json({
-      message: matchingCategory
-        ? `I understand you're having an issue with ${matchingCategory.title.toLowerCase()}. Here are some possible solutions:`
-        : "I found some possible solutions:",
-      solutions: solutions.map((solution: any) => ({
-        ...solution,
-        id: solution._id.toString(),
-      })),
+      message:
+        "I don't find any matching solutions in our database. Please create a support ticket.",
+      solutions: [],
+      suggestTicket: true,
     });
   } catch (error) {
     console.error("Chat API Error:", error);
@@ -71,10 +80,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
-
-async function findSolutionsForCategory(category: string) {
-  // Implement your logic to find solutions based on the category
-  // This is a placeholder function
-  return [];
 }

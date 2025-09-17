@@ -69,7 +69,7 @@ export const useChat = create<ChatState>()(
               {
                 role: "bot",
                 content:
-                  "Hello! I'm your IT Support Assistant. How can I help you today?",
+                  "👋 Hi, I'm here to help. Please select the issue that best matches your problem:",
               },
             ],
             isInitialized: true,

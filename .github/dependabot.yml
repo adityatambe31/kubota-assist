@@ -1,6 +1,5 @@
 version: 2
 updates:
-  # Main branch: check weekly
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -9,14 +8,13 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "deps"
-
-  # Feature branch: check every 3 days
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      day: "monday"   # GitHub does not support "every 3 days" natively; closest is daily
-    target-branch: "feature/integration"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "deps"
+    ignore:
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
+      - dependency-name: "@types/node"
+      - dependency-name: "typescript"
+      - dependency-name: "ts-node"
+      - dependency-name: "tsconfig-paths"
+      - dependency-name: "tailwindcss"
+      - dependency-name: "@tailwindcss/postcss"
+      - dependency-name: "tw-animate-css"

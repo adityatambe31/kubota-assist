@@ -1,41 +1,82 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { ITIssue } from "@/lib/models/ITIssue";
+import { SUPPORT_PROMPTS } from "@/lib/prompts";
 import { TicketType } from "@/lib/types";
+import { searchSolutions } from "@/lib/mongodb";
+import { explainSolution } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { message } = await req.json();
+    const { message, context = [] } = await req.json();
 
-    // Server-side mongoose query
-    const solutions = await ITIssue.find(
-      { $text: { $search: message } },
-      { score: { $meta: "textScore" } }
-    )
-      .sort({ score: { $meta: "textScore" } })
-      .limit(3)
-      .lean(); // Convert to plain JavaScript objects
+    // Initial category selection
+    if (context.length === 0) {
+      const selectedCategory = SUPPORT_PROMPTS.find(
+        (cat) => cat.title === message
+      );
 
-    if (!solutions.length) {
+      if (selectedCategory) {
+        return NextResponse.json({
+          message: "Please select your specific issue:",
+          solutions: selectedCategory.subPrompts.map((subPrompt) => ({
+            solution: [subPrompt.text],
+            category: selectedCategory.title,
+          })),
+          suggestTicket: false,
+        });
+      }
+    }
+
+    // Find matching category
+    const matchingCategory = SUPPORT_PROMPTS.find((category) =>
+      category.subPrompts.some((subPrompt) =>
+        subPrompt.keywords.some((keyword) =>
+          message.toLowerCase().includes(keyword.toLowerCase())
+        )
+      )
+    );
+
+    // Determine category
+    let category: TicketType | undefined = Object.values(TicketType).find(
+      (type) => type === matchingCategory?.title
+    );
+
+    // Try getting category from context
+    if (!category && context.length > 0) {
+      const lastMessage = context[context.length - 1].content;
+      category = Object.values(TicketType).find(
+        (type) =>
+          type ===
+          SUPPORT_PROMPTS.find((cat) => cat.title === lastMessage)?.title
+      );
+    }
+
+    // Search for solutions in database
+    const solutions = await searchSolutions(message, category);
+
+    if (solutions.length > 0) {
+      // Get AI explanation for the solutions
+      const explanation = await explainSolution(message, solutions, context);
+
       return NextResponse.json({
-        message:
-          "I couldn't find an exact match. Would you like to create a support ticket?",
-        solutions: [],
+        message: explanation,
+        solutions: solutions,
+        suggestTicket: false,
       });
     }
 
+    // No solutions found
     return NextResponse.json({
-      message: "I found some possible solutions:",
-      solutions: solutions.map((solution) => ({
-        ...solution,
-        id: solution._id.toString(), // Convert ObjectId to string
-      })),
+      message:
+        "I don't find any matching solutions in our database. Please create a support ticket.",
+      solutions: [],
+      suggestTicket: true,
     });
   } catch (error) {
     console.error("Chat API Error:", error);
     return NextResponse.json(
-      { error: "Failed to process request" },
+      { message: "An error occurred while processing your request." },
       { status: 500 }
     );
   }

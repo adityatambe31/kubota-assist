@@ -1,39 +1,87 @@
-import { useState, useEffect } from "react";
+import { create } from "zustand";
+import {
+  persist,
+  createJSONStorage,
+  type StateStorage,
+} from "zustand/middleware";
 
 export type ChatMessage = {
   role: "bot" | "user";
   content: string;
-  solutions?: any[];
+  solutions?: Array<{
+    title: string;
+    solution: string[];
+    category?: string;
+  }>;
 };
 
-export function useChat(isFullPage: boolean = false) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-
-  // Load messages when component mounts
-  useEffect(() => {
-    const savedMessages = localStorage.getItem("chatMessages");
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    } else {
-      setMessages([
-        {
-          role: "bot",
-          content:
-            "Hello! I'm your IT support assistant. How can I help you today?",
-        },
-      ]);
-    }
-  }, []);
-
-  // Save messages whenever they change
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem("chatMessages", JSON.stringify(messages));
-    }
-  }, [messages]);
-
-  return {
-    messages,
-    setMessages,
-  };
+interface ChatState {
+  messages: ChatMessage[];
+  lastActivity: number;
+  isInitialized: boolean;
+  setMessages: (messages: ChatMessage[]) => void;
+  addMessage: (message: ChatMessage) => void;
+  initialize: () => void;
+  clearMessages: () => void;
+  updateActivity: () => void;
 }
+
+// Custom storage implementation
+const storage: StateStorage = {
+  getItem: (name): string | null => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem(name);
+  },
+  setItem: (name, value): void => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(name, value);
+    }
+  },
+  removeItem: (name): void => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(name);
+    }
+  },
+};
+
+export const useChat = create<ChatState>()(
+  persist(
+    (set, get) => ({
+      messages: [],
+      lastActivity: Date.now(),
+      isInitialized: false,
+      setMessages: (messages) => set({ messages }),
+      addMessage: (message) =>
+        set((state) => ({
+          messages: [...state.messages, message],
+          lastActivity: Date.now(),
+        })),
+      updateActivity: () =>
+        set((state) => ({
+          ...state,
+          lastActivity: Date.now(),
+        })),
+      initialize: () => {
+        const state = get();
+        if (!state.isInitialized) {
+          set({
+            messages: [
+              {
+                role: "bot",
+                content:
+                  "👋 Hi, I'm here to help. Please select the issue that best matches your problem:",
+              },
+            ],
+            isInitialized: true,
+            lastActivity: Date.now(),
+          });
+        }
+      },
+      clearMessages: () => set({ messages: [], isInitialized: false }),
+    }),
+    {
+      name: "chat-storage",
+      storage: createJSONStorage(() => storage),
+    }
+  )
+);

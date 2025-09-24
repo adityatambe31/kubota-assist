@@ -29,3 +29,9 @@ export interface TicketSuggestion {
   ticketType?: TicketType;
   ticketDescription?: string;
 }
+
+export interface HandbookEntry {
+  title: string;
+  solution: string[];
+  category?: string;
+}

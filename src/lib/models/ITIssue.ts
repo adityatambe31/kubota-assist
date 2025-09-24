@@ -2,24 +2,28 @@ import mongoose from "mongoose";
 
 // Define ticket types as an enum for better type safety
 export enum TicketType {
-  LOGIN_ISSUES = "login_issues",
-  NEW_REQUEST = "new_request",
-  INCIDENT = "incident",
-  KDASH_ACCESS = "kdash_access",
-  EXTERNAL_ACCESS = "external_access",
-  VPN_REQUEST = "vpn_request",
+  LOGIN_ISSUES = "Login / Password Reset Issues",
+  HARDWARE_SOFTWARE = "New Laptop / Hardware / Software Requests",
+  VPN_ACCESS = "VPN / Remote Access Issues",
+  APPLICATION = "Application Issues",
+  EMAIL = "Email / Outlook Problems",
+  PRINTER = "Printer / Peripheral Issues",
+  TEAMS = "Microsoft Teams / Phone Issues",
+  SYSTEM = "Windows Updates / System Performance",
 }
 
 // Define ticket descriptions
 export const TicketDescriptions = {
   [TicketType.LOGIN_ISSUES]:
     "Password reset, account unlock, and general login assistance",
-  [TicketType.NEW_REQUEST]: "Request new hardware, software, or system access",
-  [TicketType.INCIDENT]: "Report technical issues or incidents",
-  [TicketType.KDASH_ACCESS]: "Request access to K-dash platform",
-  [TicketType.EXTERNAL_ACCESS]:
-    "Access requests for external users and vendors",
-  [TicketType.VPN_REQUEST]: "Geo-location based VPN access requests",
+  [TicketType.HARDWARE_SOFTWARE]:
+    "Request new hardware, software, or system access",
+  [TicketType.VPN_ACCESS]: "VPN and remote access assistance",
+  [TicketType.APPLICATION]: "Help with AS400, DealerLink, IBM Notes, etc",
+  [TicketType.EMAIL]: "Email and Outlook related issues",
+  [TicketType.PRINTER]: "Printer and peripheral device support",
+  [TicketType.TEAMS]: "Microsoft Teams and phone system support",
+  [TicketType.SYSTEM]: "Windows updates and system performance issues",
 };
 
 const ITIssueSchema = new mongoose.Schema({

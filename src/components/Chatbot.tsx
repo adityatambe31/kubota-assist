@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react"; // Add useRef import
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -8,43 +8,47 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Send, X, Maximize2, Bot, User, ArrowRight } from "lucide-react";
+import { Send, X, Maximize2, Bot, User } from "lucide-react";
 import Image from "next/image";
-import { HandbookEntry } from "@/lib/types";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
-import { TicketType } from "@/lib/models/ITIssue";
-
-interface TicketSuggestion {
-  suggestTicket: boolean;
-  ticketType?: TicketType;
-  ticketDescription?: string;
-}
-
-interface SolutionFeedback {
-  showFeedback: boolean;
-  solutionId?: string;
-  category?: TicketType;
-}
-
-interface ChatMessage {
-  role: "bot" | "user";
-  content: string;
-  solutions?: HandbookEntry[];
-  feedback?: SolutionFeedback;
-}
+import { type HandbookEntry } from "@/lib/types";
 
 export function ChatBot() {
-  const { messages, setMessages } = useChat();
+  const { messages, addMessage, updateActivity } = useChat();
   const [input, setInput] = useState("");
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Add ref for messages container
+  // Initialize chat on first render
+  useEffect(() => {
+    if (messages.length === 0) {
+      addMessage({
+        role: "bot",
+        content:
+          "👋 Hi, I'm here to help. Please select the issue that best matches your problem:",
+      });
+    }
+  }, [messages.length, addMessage]);
+
+  // Main prompts data
+  const mainPrompts = [
+    { icon: "🔑", title: "Login / Password Reset" },
+    { icon: "💻", title: "New Laptop / Hardware / Software Request" },
+    { icon: "🌐", title: "VPN / Remote Access" },
+    {
+      icon: "📂",
+      title: "Application Issues (AS400, DealerLink, IBM Notes, etc.)",
+    },
+    { icon: "📧", title: "Email / Outlook" },
+    { icon: "🖨️", title: "Printer / Peripheral" },
+    { icon: "📞", title: "Microsoft Teams / Phone" },
+    { icon: "🔄", title: "Windows Updates / System Performance" },
+  ];
+
+  // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // Add input ref
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Add scroll to bottom effect
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -75,7 +79,6 @@ export function ChatBot() {
     }
   }, [isOpen]);
 
-  // Add loading state
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,11 +90,11 @@ export function ChatBot() {
       content: input.trim(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
+    updateActivity();
     setInput("");
     setIsLoading(true);
 
-    // Prepare context including the new user message
     const updatedContext = [...messages, userMessage];
 
     try {
@@ -105,104 +108,33 @@ export function ChatBot() {
       });
 
       const data = await response.json();
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          content: data.message,
-          solutions: data.solutions,
-        },
-      ]);
+      addMessage({
+        role: "bot",
+        content: data.message,
+        solutions: data.solutions,
+      });
+      updateActivity();
     } catch (error) {
       console.error("Chat Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          content: "I'm sorry, I encountered an error. Please try again.",
-        },
-      ]);
+      addMessage({
+        role: "bot",
+        content: "I'm sorry, I encountered an error. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Render solutions in message bubbles
-  const renderSolutions = (solutions: HandbookEntry[]) => (
-    <div className="space-y-2 mt-2">
-      {solutions.map((solution, index) => (
-        <div key={index} className="bg-orange-50 rounded-lg p-3">
-          <div className="font-medium mb-1">Solution {index + 1}</div>
-          <ol className="list-decimal list-inside space-y-1">
-            {solution.solution.map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ol>
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderTicketSuggestion = (suggestion: TicketSuggestion) => {
-    if (!suggestion.suggestTicket) return null;
-
-    return (
-      <div className="mt-2 space-y-2">
-        <p className="text-sm text-gray-600">
-          Would you like to create a support ticket?
-        </p>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => window.open("/chat", "_blank")}
-        >
-          Create VPN Support Ticket
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    );
-  };
-
-  const renderSolution = (solution: any) => (
+  const renderSolution = (solution: HandbookEntry) => (
     <div className="bg-orange-50 rounded-lg p-3 mt-2">
       <h4 className="font-medium text-sm mb-2">{solution.title}</h4>
       <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
         {solution.solution.map((step: string, i: number) => (
-          <li key={i}>{step}</li>
+          <li key={`${solution.title}-step-${i}`}>{step}</li>
         ))}
       </ol>
     </div>
   );
-
-  const renderFeedback = (feedback: SolutionFeedback, messageIndex: number) => {
-    if (!feedback.showFeedback) return null;
-
-    return (
-      <div className="mt-4 space-y-3">
-        <p className="text-sm text-gray-600 font-medium">
-          Did this solution help resolve your issue?
-        </p>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-20"
-            onClick={() => handleFeedback(messageIndex, true)}
-          >
-            Yes
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-20"
-            onClick={() => handleFeedback(messageIndex, false)}
-          >
-            No
-          </Button>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
@@ -241,11 +173,7 @@ export function ChatBot() {
 
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="ghost"
               size="icon"
@@ -274,13 +202,9 @@ export function ChatBot() {
               opacity: 1,
               y: 0,
               scale: 1,
-              transition: {
-                type: "spring",
-                stiffness: 100,
-                damping: 15,
-              },
+              transition: { type: "spring", stiffness: 100, damping: 15 },
             }}
-            className="flex flex-col h-[85vh] md:h-[500px]" // Made taller
+            className="flex flex-col h-[85vh] md:h-[500px]"
           >
             <div className="p-4 border-b bg-orange-600 flex justify-between items-center">
               <h3 className="font-semibold text-white flex items-center gap-2">
@@ -308,47 +232,92 @@ export function ChatBot() {
               </div>
             </div>
 
-            {/* Messages section with icons */}
+            {/* Messages */}
             <div className="flex-1 p-4 overflow-y-auto space-y-5">
-              {" "}
-              {/* Increased gap */}
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex items-start gap-3 ${
-                    // Increased gap
-                    msg.role === "bot" ? "justify-start" : "justify-end"
-                  }`}
-                >
-                  {msg.role === "bot" && (
-                    <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
-                      <Bot className="h-5 w-5 text-white" />
+              {messages.length <= 1 ? (
+                <div className="space-y-5">
+                  {messages.map((msg, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
+                        <Bot className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="rounded-lg px-4 py-3 max-w-[85%] bg-gray-100">
+                        <p>{msg.content}</p>
+                      </div>
                     </div>
-                  )}
+                  ))}
+
+                  {/* Prompt buttons */}
+                  <div className="ml-11 space-y-2">
+                    {mainPrompts.map((prompt, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="w-full justify-start text-left hover:bg-orange-50 hover:border-orange-200 transition-colors"
+                        onClick={async () => {
+                          setInput(prompt.title);
+                          await handleSubmit(new Event("submit") as any);
+                          updateActivity();
+                        }}
+                      >
+                        <span className="mr-3 text-xl">{prompt.icon}</span>
+                        <span>{prompt.title}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                messages.map((msg, i) => (
                   <div
-                    className={`rounded-lg px-4 py-3 max-w-[85%] ${
-                      // Increased padding and max-width
+                    key={i}
+                    className={`flex items-start gap-3 ${
                       msg.role === "bot"
-                        ? "bg-gray-100 text-black"
-                        : "bg-orange-600 text-white"
+                        ? "justify-start"
+                        : "justify-end flex-row-reverse"
                     }`}
                   >
-                    {msg.content}
-                    {msg.solutions?.map((solution, i) =>
-                      renderSolution(solution)
+                    {msg.role === "bot" ? (
+                      <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
+                        <Bot className="h-5 w-5 text-white" />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <User className="h-5 w-5 text-gray-600" />
+                      </div>
                     )}
-                    {/* Render feedback */}
-                  </div>
-                  {msg.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="h-5 w-5 text-gray-600" />
+                    <div
+                      className={`rounded-lg px-4 py-3 max-w-[85%] ${
+                        msg.role === "bot"
+                          ? "bg-gray-100 text-black"
+                          : "bg-orange-600 text-white"
+                      }`}
+                    >
+                      {/* ✅ Only show text if no solutions */}
+                      {(!msg.solutions || msg.solutions.length === 0) && (
+                        <div className="whitespace-pre-line">
+                          {msg.content
+                            .replace(/###[^#]+###/g, "")
+                            .replace(/\*\*([^*]+)\*\*/g, "$1")
+                            .replace(/\*([^*]+)\*/g, "$1")
+                            .replace(/- /g, "• ")
+                            .trim()}
+                        </div>
+                      )}
+
+                      {/* ✅ Show orange cards if solutions exist */}
+                      {msg.solutions?.map((solution, i) => (
+                        <div key={`${i}-${solution.title}`}>
+                          {renderSolution(solution)}
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              ))}
-              <div ref={messagesEndRef} /> {/* Add scroll anchor */}
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
             </div>
 
+            {/* Input */}
             <form onSubmit={handleSubmit} className="p-4 border-t">
               <div className="flex gap-2">
                 <input

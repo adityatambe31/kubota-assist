@@ -12,12 +12,15 @@ import { Send, X, Maximize2, Bot, User } from "lucide-react";
 import Image from "next/image";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
 import { type HandbookEntry } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 export function ChatBot() {
-  const { messages, addMessage, updateActivity } = useChat();
+  const { messages, addMessage, updateActivity, generateTicketData } =
+    useChat();
   const [input, setInput] = useState("");
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   // Initialize chat on first render
   useEffect(() => {
@@ -125,14 +128,45 @@ export function ChatBot() {
     }
   };
 
-  const renderSolution = (solution: HandbookEntry) => (
-    <div className="bg-orange-50 rounded-lg p-3 mt-2">
-      <h4 className="font-medium text-sm mb-2">{solution.title}</h4>
-      <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-        {solution.solution.map((step: string, i: number) => (
-          <li key={`${solution.title}-step-${i}`}>{step}</li>
-        ))}
-      </ol>
+  const handleCreateTicket = () => {
+    const ticketData = generateTicketData();
+    if (ticketData) {
+      // Store ticket data in sessionStorage for the ticket page
+      sessionStorage.setItem("pendingTicketData", JSON.stringify(ticketData));
+      router.push("/ticket");
+      setIsOpen(false);
+    }
+  };
+
+  const renderSolution = (
+    solution: HandbookEntry,
+    isLastMessage: boolean = false
+  ) => (
+    <div className="space-y-3">
+      <div className="bg-orange-50 rounded-lg p-3">
+        <h4 className="font-medium text-sm mb-2">{solution.title}</h4>
+        <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
+          {solution.solution.map((step: string, i: number) => (
+            <li key={`${solution.title}-step-${i}`}>{step}</li>
+          ))}
+        </ol>
+      </div>
+
+      {isLastMessage && (
+        <div className="bg-white border border-orange-200 rounded-lg p-3">
+          <p className="text-sm text-gray-600 mb-3">
+            Did these steps solve your issue? If not, you can create a support
+            ticket and we'll help you further.
+          </p>
+          <Button
+            onClick={handleCreateTicket}
+            size="sm"
+            className="bg-orange-600 hover:bg-orange-700 text-white"
+          >
+            Create Support Ticket
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -305,11 +339,20 @@ export function ChatBot() {
                       )}
 
                       {/* ✅ Show orange cards if solutions exist */}
-                      {msg.solutions?.map((solution, i) => (
-                        <div key={`${i}-${solution.title}`}>
-                          {renderSolution(solution)}
-                        </div>
-                      ))}
+                      {msg.solutions?.map((solution, solutionIndex) => {
+                        const isLastBotMessage =
+                          i === messages.length - 1 && msg.role === "bot";
+                        const isLastSolution =
+                          solutionIndex === (msg.solutions?.length || 0) - 1;
+                        const shouldShowTicketButton =
+                          isLastBotMessage && isLastSolution;
+
+                        return (
+                          <div key={`${solutionIndex}-${solution.title}`}>
+                            {renderSolution(solution, shouldShowTicketButton)}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))

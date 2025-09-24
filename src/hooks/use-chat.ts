@@ -15,15 +15,28 @@ export type ChatMessage = {
   }>;
 };
 
+export type TicketData = {
+  originalIssue: string;
+  solutionsAttempted: Array<{
+    title: string;
+    steps: string[];
+  }>;
+  category?: string;
+  conversationHistory: ChatMessage[];
+};
+
 interface ChatState {
   messages: ChatMessage[];
   lastActivity: number;
   isInitialized: boolean;
+  ticketData: TicketData | null;
   setMessages: (messages: ChatMessage[]) => void;
   addMessage: (message: ChatMessage) => void;
   initialize: () => void;
   clearMessages: () => void;
   updateActivity: () => void;
+  generateTicketData: () => TicketData | null;
+  clearTicketData: () => void;
 }
 
 // Custom storage implementation
@@ -50,6 +63,7 @@ export const useChat = create<ChatState>()(
       messages: [],
       lastActivity: Date.now(),
       isInitialized: false,
+      ticketData: null,
       setMessages: (messages) => set({ messages }),
       addMessage: (message) =>
         set((state) => ({
@@ -77,7 +91,39 @@ export const useChat = create<ChatState>()(
           });
         }
       },
-      clearMessages: () => set({ messages: [], isInitialized: false }),
+      clearMessages: () =>
+        set({ messages: [], isInitialized: false, ticketData: null }),
+      generateTicketData: () => {
+        const state = get();
+        const userMessages = state.messages.filter(
+          (msg) => msg.role === "user"
+        );
+        const botMessagesWithSolutions = state.messages.filter(
+          (msg) => msg.role === "bot" && msg.solutions
+        );
+
+        if (userMessages.length === 0) return null;
+
+        const originalIssue = userMessages[0]?.content || "";
+        const solutionsAttempted = botMessagesWithSolutions.flatMap(
+          (msg) =>
+            msg.solutions?.map((solution) => ({
+              title: solution.title,
+              steps: solution.solution,
+            })) || []
+        );
+
+        const ticketData: TicketData = {
+          originalIssue,
+          solutionsAttempted,
+          conversationHistory: state.messages,
+          category: botMessagesWithSolutions[0]?.solutions?.[0]?.category,
+        };
+
+        set({ ticketData });
+        return ticketData;
+      },
+      clearTicketData: () => set({ ticketData: null }),
     }),
     {
       name: "chat-storage",

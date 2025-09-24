@@ -9,7 +9,7 @@
     "seed": "ts-node -r tsconfig-paths/register scripts/seed-data.ts"
   },
   "dependencies": {
-    "@google/genai": "^1.19.0",
+    "@google/genai": "^1.20.0",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-scroll-area": "^1.2.10",

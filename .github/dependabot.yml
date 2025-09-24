@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Main branch: check weekly
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+
+  # Feature branch: check every 3 days
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      day: "monday"   # GitHub does not support "every 3 days" natively; closest is daily
+    target-branch: "feature/integration"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"

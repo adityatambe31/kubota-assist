@@ -22,7 +22,7 @@
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
     "mime": "^4.1.0",
-    "mongodb": "^6.19.0",
+    "mongodb": "^6.20.0",
     "mongoose": "^8.18.1",
     "next": "^15.5.2",
     "react": "19.1.0",

@@ -4,11 +4,21 @@ import { SUPPORT_PROMPTS } from "@/lib/prompts";
 import { TicketType } from "@/lib/types";
 import { searchSolutions } from "@/lib/mongodb";
 import { explainSolution } from "@/lib/gemini";
+import autoSaveChatService from "@/lib/services/AutoSaveChatService";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { message, context = [] } = await req.json();
+    const { message, context = [], sessionId } = await req.json();
+
+    // Generate session ID if not provided
+    const currentSessionId =
+      sessionId ||
+      `chat_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+    console.log(`💬 Processing chat for session: ${currentSessionId}`);
+    console.log(`📝 Message: "${message}"`);
+    console.log(`🔗 Context length: ${context.length}`);
 
     // Initial category selection
     if (context.length === 0) {
@@ -59,19 +69,68 @@ export async function POST(req: Request) {
       // Get AI explanation for the solutions
       const explanation = await explainSolution(message, solutions, context);
 
+      // Prepare chat messages for encryption
+      const chatMessages = [
+        ...context, // Previous messages in the conversation
+        { role: "user", content: message }, // Current user message
+        { role: "bot", content: explanation }, // Bot response
+      ];
+
+      // Auto-save the conversation in encrypted format
+      try {
+        console.log(
+          `🔐 Auto-saving encrypted conversation for session: ${currentSessionId}`
+        );
+        await autoSaveChatService.saveCompletedChatSession(chatMessages, {
+          sessionId: currentSessionId,
+          category: category || "general-support",
+          resolved: true, // Mark as resolved since we provided solutions
+        });
+        console.log(`✅ Conversation encrypted and saved to MongoDB!`);
+      } catch (saveError) {
+        console.error("❌ Failed to save encrypted conversation:", saveError);
+        // Don't fail the main response if saving fails
+      }
+
       return NextResponse.json({
         message: explanation,
         solutions: solutions,
         suggestTicket: false,
+        sessionId: currentSessionId, // Return session ID to frontend
       });
     }
 
     // No solutions found
+    const noSolutionMessage =
+      "I don't find any matching solutions in our database. Please create a support ticket.";
+
+    // Prepare chat messages for encryption
+    const chatMessages = [
+      ...context, // Previous messages
+      { role: "user", content: message }, // User message
+      { role: "bot", content: noSolutionMessage }, // Bot response
+    ];
+
+    // Auto-save unresolved conversation
+    try {
+      console.log(
+        `🔐 Auto-saving unresolved conversation for session: ${currentSessionId}`
+      );
+      await autoSaveChatService.saveCompletedChatSession(chatMessages, {
+        sessionId: currentSessionId,
+        category: category || "unresolved",
+        resolved: false, // Mark as unresolved
+      });
+      console.log(`✅ Unresolved conversation encrypted and saved!`);
+    } catch (saveError) {
+      console.error("❌ Failed to save unresolved conversation:", saveError);
+    }
+
     return NextResponse.json({
-      message:
-        "I don't find any matching solutions in our database. Please create a support ticket.",
+      message: noSolutionMessage,
       solutions: [],
       suggestTicket: true,
+      sessionId: currentSessionId,
     });
   } catch (error) {
     console.error("Chat API Error:", error);

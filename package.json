@@ -9,6 +9,7 @@
     "seed": "ts-node -r tsconfig-paths/register scripts/seed-data.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "^3.896.0",
     "@google/genai": "^1.19.0",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-popover": "^1.1.15",
@@ -18,6 +19,7 @@
     "@types/snowflake-sdk": "^1.6.24",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "crypto": "^1.0.1",
     "dotenv": "^17.2.2",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",

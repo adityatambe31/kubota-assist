@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HandbookEntry } from "./types";
-import { GEMINI_SYSTEM_PROMPT, SOLUTION_TEMPLATE } from "./prompts";
+import { GEMINI_SYSTEM_PROMPT } from "./prompts";
 
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not set in environment variables");
@@ -9,157 +9,41 @@ if (!process.env.GEMINI_API_KEY) {
 // Initialize the model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// For text-only input, use the latest Gemini model
+// Use the working model (the old reliable one)
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash", // or "gemini-1.5-pro"
+  model: "gemini-1.0-pro", // This one actually works!
   generationConfig: {
-    maxOutputTokens: 2048,
+    maxOutputTokens: 1024,
     temperature: 0.7,
     topP: 0.8,
     topK: 40,
   },
 });
 
+// Simple fallback when AI fails
+function createFallback(query: string, solutions: HandbookEntry[]): string {
+  if (solutions.length === 0) {
+    return `I understand you're having issues with: "${query}"\n\nPlease create a support ticket for assistance.`;
+  }
+
+  let response = `## Solutions for: ${query}\n\n`;
+  solutions.forEach((solution, index) => {
+    response += `### ${solution.title}\n`;
+    response += `**Category:** ${solution.category || "General"}\n\n`;
+    response += `**Steps:**\n`;
+    solution.solution.forEach((step, stepIndex) => {
+      response += `${stepIndex + 1}. ${step}\n`;
+    });
+    response += "\n";
+  });
+
+  return response;
+}
+
 export async function analyzeIssueWithGemini(
   query: string,
   solutions: HandbookEntry[],
   context: { role: string; content: string }[] = []
-) {
-  try {
-    // Format solutions for the AI
-    const formattedSolutions = solutions.map(
-      (s, i) => `SOLUTION ${i + 1}:
-Title: ${s.title}
-Category: ${s.category || "General"}
-Steps:
-${s.solution.map((step, j) => `${j + 1}. ${step}`).join("\n")}`
-    );
-
-    // Format chat history
-    const formattedHistory = context
-      .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
-      .join("\n");
-
-    // Construct prompt using template
-    const prompt = `${GEMINI_SYSTEM_PROMPT}
-
-USER QUERY:
-${query}
-${formattedHistory ? `\nCONVERSATION HISTORY:\n${formattedHistory}` : ""}
-${
-  formattedSolutions.length > 0
-    ? `\nDATABASE SOLUTIONS:\n${formattedSolutions.join("\n\n")}`
-    : "\nNO_SOLUTIONS_FOUND"
-}
-
-TASK:
-1. Review the user's query carefully
-2. Check if any database solutions match the issue
-3. If matches found: Explain how to apply the solution(s) step by step
-4. If no matches: Recommend creating a support ticket
-
-Provide your response:`;
-
-    // Initialize chat with system context
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: GEMINI_SYSTEM_PROMPT }],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: "I understand. I will only use and explain solutions from the database.",
-            },
-          ],
-        },
-      ],
-    });
-
-    // Get AI response
-    const result = await chat.sendMessage([{ text: prompt }]);
-    const response = await result.response.text();
-
-    return {
-      message: response,
-      suggestTicket: solutions.length === 0,
-      enhancedSolutions: solutions,
-    };
-  } catch (error) {
-    console.error("Error in Gemini analysis:", error);
-    throw error;
-  }
-}
-
-export async function explainSolution(
-  query: string,
-  solutions: HandbookEntry[],
-  context?: { role: string; content: string }[]
-) {
-  try {
-    // Format solutions for the AI
-    const formattedSolutions = solutions.map(
-      (s, i) => `SOLUTION ${i + 1}:
-Title: ${s.title}
-Category: ${s.category || "General"}
-Steps:
-${s.solution.map((step, j) => `${j + 1}. ${step}`).join("\n")}`
-    );
-
-    // Construct prompt using template
-    const prompt = `${GEMINI_SYSTEM_PROMPT}
-
-USER QUERY:
-${query}
-
-DATABASE SOLUTIONS:
-${formattedSolutions.join("\n\n")}
-
-TASK:
-1. Analyze the user's issue
-2. Format your response using the exact structure specified in the system prompt
-3. Include all relevant information from the database solutions
-4. Ensure proper markdown formatting with headers, lists, and emphasis
-
-Remember to follow the exact response format with proper sections and formatting.
-Provide your response:`;
-
-    // Initialize chat with system context
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: GEMINI_SYSTEM_PROMPT }],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: "I understand. I will only explain solutions from the database.",
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        maxOutputTokens: 2048,
-      },
-    });
-
-    // Get AI response
-    const result = await chat.sendMessage([{ text: prompt }]);
-    return result.response.text();
-  } catch (error) {
-    console.error("Error explaining solution:", error);
-    throw error;
-  }
-}
-
-export async function* streamExplanation(
-  query: string,
-  solutions: HandbookEntry[],
-  context?: { role: string; content: string }[]
 ) {
   try {
     // Format solutions
@@ -173,47 +57,80 @@ ${s.solution.map((step, j) => `${j + 1}. ${step}`).join("\n")}`
 
     const prompt = `${GEMINI_SYSTEM_PROMPT}
 
-USER QUERY:
-${query}
+USER QUERY: ${query}
+
 ${
   formattedSolutions.length > 0
-    ? `\nDATABASE SOLUTIONS:\n${formattedSolutions.join("\n\n")}`
-    : "\nNO_SOLUTIONS_FOUND"
+    ? `DATABASE SOLUTIONS:\n${formattedSolutions.join("\n\n")}`
+    : "NO_SOLUTIONS_FOUND"
 }
 
-TASK:
-1. Review the user's query carefully
-2. Explain how to implement these solutions step by step
-3. If no solutions are available, recommend creating a support ticket
+Please provide a helpful response.`;
 
-Provide your response:`;
+    const result = await model.generateContent(prompt);
+    const response = await result.response.text();
 
-    // Initialize chat
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: GEMINI_SYSTEM_PROMPT }],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: "I understand. I will only explain solutions from the database.",
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        maxOutputTokens: 8000,
-      },
-    });
+    return {
+      message: response,
+      suggestTicket: solutions.length === 0,
+      enhancedSolutions: solutions,
+    };
+  } catch (error: any) {
+    console.error("Gemini error:", error);
 
-    const result = await chat.sendMessage([{ text: prompt }]);
-    const response = await result.response;
-    yield response.text();
+    // Use fallback for any error
+    return {
+      message: createFallback(query, solutions),
+      suggestTicket: solutions.length === 0,
+      enhancedSolutions: solutions,
+    };
+  }
+}
+
+export async function explainSolution(
+  query: string,
+  solutions: HandbookEntry[],
+  context?: { role: string; content: string }[]
+) {
+  try {
+    // Early fallback if no solutions
+    if (!solutions || solutions.length === 0) {
+      return createFallback(query, solutions);
+    }
+
+    const formattedSolutions = solutions.map(
+      (s, i) => `SOLUTION ${i + 1}:
+Title: ${s.title}
+Steps: ${s.solution.join(", ")}`
+    );
+
+    const prompt = `Explain these solutions for: ${query}
+
+${formattedSolutions.join("\n\n")}
+
+Please provide clear, step-by-step instructions.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response.text();
+    return response;
+  } catch (error: any) {
+    console.error("Gemini explainSolution error:", error);
+
+    // Always use fallback on any error
+    return createFallback(query, solutions);
+  }
+}
+
+export async function* streamExplanation(
+  query: string,
+  solutions: HandbookEntry[],
+  context?: { role: string; content: string }[]
+) {
+  try {
+    const explanation = await explainSolution(query, solutions, context);
+    yield explanation;
   } catch (error) {
-    console.error("Error in streaming explanation:", error);
-    throw error;
+    console.error("Streaming error:", error);
+    yield createFallback(query, solutions);
   }
 }

@@ -27,6 +27,7 @@
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "next": "^15.5.2",
+    "openai": "^5.23.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "snowflake-sdk": "^2.2.0",

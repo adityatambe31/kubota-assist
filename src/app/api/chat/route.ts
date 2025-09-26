@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import { SUPPORT_PROMPTS } from "@/lib/prompts";
 import { TicketType } from "@/lib/types";
 import { searchSolutions } from "@/lib/mongodb";
-import { explainSolution } from "@/lib/gemini";
+import { explainSolution } from "@/lib/openai";
 import autoSaveChatService from "@/lib/services/AutoSaveChatService";
 
 export async function POST(req: Request) {

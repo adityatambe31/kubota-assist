@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
+import { getUserDisplayName } from "@/lib/utils";
 
 // Mock user data - In a real app, this would be in a database
 let users = [
@@ -39,18 +42,48 @@ let users = [
   },
 ];
 
-// GET - Fetch all users
+// GET - Fetch all users from Clerk
 export async function GET() {
   try {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Get the clerk client instance
+    const clerk = await clerkClient();
+
+    // Fetch users from Clerk
+    const clerkUsers = await clerk.users.getUserList({
+      limit: 100,
+      offset: 0,
+    });
+
+    // Transform Clerk users to our format
+    const transformedUsers = clerkUsers.data.map((user: any) => ({
+      id: user.id,
+      email: user.emailAddresses[0]?.emailAddress || "",
+      username: getUserDisplayName(
+        user.firstName,
+        user.lastName,
+        user.emailAddresses[0]?.emailAddress || ""
+      ),
+      role: (user.publicMetadata?.role as string) || "end_user",
+      status: user.banned ? "revoked" : "active",
+      createdAt: new Date(user.createdAt).toISOString().split("T")[0],
+    }));
 
     return NextResponse.json({
       success: true,
-      users: users,
-      total: users.length,
+      users: transformedUsers,
+      total: transformedUsers.length,
     });
   } catch (error) {
+    console.error("Error fetching users:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch users" },
       { status: 500 }
@@ -58,9 +91,18 @@ export async function GET() {
   }
 }
 
-// PATCH - Update user role or status
+// PATCH - Update user role or status in Clerk
 export async function PATCH(req: Request) {
   try {
+    const { userId: currentUserId } = await auth();
+
+    if (!currentUserId) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { userId, role, status } = await req.json();
 
     if (!userId) {
@@ -70,32 +112,47 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const userIndex = users.findIndex((user) => user.id === userId);
-
-    if (userIndex === -1) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 }
-      );
-    }
+    // Get the clerk client instance
+    const clerk = await clerkClient();
 
     // Update role if provided
     if (role && ["end_user", "staff", "super_admin"].includes(role)) {
-      users[userIndex].role = role;
+      await clerk.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          role: role,
+        },
+      });
     }
 
-    // Update status if provided
+    // Update status if provided (ban/unban user)
     if (status && ["active", "revoked"].includes(status)) {
-      users[userIndex].status = status;
+      if (status === "revoked") {
+        await clerk.users.banUser(userId);
+      } else if (status === "active") {
+        await clerk.users.unbanUser(userId);
+      }
     }
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Fetch the updated user to return
+    const updatedUser = await clerk.users.getUser(userId);
+
+    const transformedUser = {
+      id: updatedUser.id,
+      email: updatedUser.emailAddresses[0]?.emailAddress || "",
+      username: getUserDisplayName(
+        updatedUser.firstName,
+        updatedUser.lastName,
+        updatedUser.emailAddresses[0]?.emailAddress || ""
+      ),
+      role: (updatedUser.publicMetadata?.role as string) || "end_user",
+      status: updatedUser.banned ? "revoked" : "active",
+      createdAt: new Date(updatedUser.createdAt).toISOString().split("T")[0],
+    };
 
     return NextResponse.json({
       success: true,
       message: "User updated successfully",
-      user: users[userIndex],
+      user: transformedUser,
     });
   } catch (error) {
     console.error("Error updating user:", error);

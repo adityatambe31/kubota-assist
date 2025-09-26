@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-kms": "^3.896.0",
+    "@clerk/nextjs": "^6.32.2",
     "@google/genai": "^1.19.0",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -32,6 +33,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "snowflake-sdk": "^2.2.0",
+    "svix": "^1.76.1",
     "tailwind-merge": "^3.3.1",
     "zustand": "^5.0.8"
   },

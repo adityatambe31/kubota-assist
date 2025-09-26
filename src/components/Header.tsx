@@ -1,10 +1,15 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, Search, Bell, Shield } from "lucide-react";
+import { Menu, Search, Bell, Shield, User } from "lucide-react";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 
 export const Header = () => {
+  const { user } = useUser();
+  const userRole = user?.publicMetadata?.role as string;
+
   return (
     <header className="bg-orange-600 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,30 +43,41 @@ export const Header = () => {
 
           {/* Right section - Navigation */}
           <div className="flex items-center gap-4">
-            <Link href="/chat">
-              <Button
-                variant="ghost"
-                className="text-white hover:bg-orange-700"
-              >
-                Support Chat
-              </Button>
-            </Link>
-            <Link href="/admin">
-              <Button
-                variant="ghost"
-                className="text-white hover:bg-orange-700"
-              >
-                <Shield className="h-4 w-4 mr-2" />
-                Admin
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-orange-700"
-            >
-              <Bell className="h-5 w-5" />
-            </Button>
+            <SignedIn>
+              {/* Show admin link only for super_admin users */}
+              {userRole === "super_admin" && (
+                <Link href="/admin">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-orange-700"
+                  >
+                    <Shield className="h-4 w-4 " />
+                    Admin Console
+                  </Button>
+                </Link>
+              )}
+
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8",
+                  },
+                }}
+                afterSignOutUrl="/"
+              />
+            </SignedIn>
+
+            <SignedOut>
+              <Link href="/sign-in">
+                <Button
+                  variant="outline"
+                  className="text-orange-600 border-white hover:bg-white"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            </SignedOut>
           </div>
         </div>
       </div>

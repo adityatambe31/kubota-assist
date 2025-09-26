@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import {
   Table,
   TableBody,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserX, Shield, Settings, Users } from "lucide-react";
+import { getUserDisplayName } from "@/lib/utils";
 
 // Types
 type UserRole = "end_user" | "staff" | "super_admin";
@@ -38,6 +40,7 @@ type UserRole = "end_user" | "staff" | "super_admin";
 interface User {
   id: string;
   email: string;
+  username: string;
   role: UserRole;
   status: "active" | "revoked";
   createdAt: string;
@@ -48,6 +51,7 @@ const mockUsers: User[] = [
   {
     id: "1",
     email: "john.doe@kubota.com",
+    username: getUserDisplayName(null, null, "john.doe@kubota.com"),
     role: "end_user",
     status: "active",
     createdAt: "2024-01-15",
@@ -55,6 +59,7 @@ const mockUsers: User[] = [
   {
     id: "2",
     email: "sarah.manager@kubota.com",
+    username: getUserDisplayName(null, null, "sarah.manager@kubota.com"),
     role: "staff",
     status: "active",
     createdAt: "2024-01-10",
@@ -62,6 +67,7 @@ const mockUsers: User[] = [
   {
     id: "3",
     email: "admin@kubota.com",
+    username: getUserDisplayName(null, null, "admin@kubota.com"),
     role: "super_admin",
     status: "active",
     createdAt: "2024-01-01",
@@ -69,6 +75,7 @@ const mockUsers: User[] = [
   {
     id: "4",
     email: "mike.user@kubota.com",
+    username: getUserDisplayName(null, null, "mike.user@kubota.com"),
     role: "end_user",
     status: "active",
     createdAt: "2024-01-20",
@@ -76,6 +83,7 @@ const mockUsers: User[] = [
   {
     id: "5",
     email: "lisa.support@kubota.com",
+    username: getUserDisplayName(null, null, "lisa.support@kubota.com"),
     role: "staff",
     status: "revoked",
     createdAt: "2024-01-05",
@@ -109,8 +117,40 @@ const getRoleIcon = (role: UserRole) => {
 };
 
 export default function AdminConsole() {
+  const { user, isLoaded } = useUser();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Check if user has super_admin role
+  const userRole = user?.publicMetadata?.role as string;
+  const isAuthorized = userRole === "super_admin";
+
+  // Show loading while user data is being fetched
+  if (!isLoaded) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-pulse text-lg">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show unauthorized message if user doesn't have admin access
+  if (!isAuthorized) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-red-600">Access Denied</h2>
+            <p className="text-gray-600 mt-2">
+              You don't have permission to access the admin console.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Load users from API
   useEffect(() => {
@@ -315,7 +355,7 @@ export default function AdminConsole() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User ID</TableHead>
+                <TableHead>Username</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
@@ -326,8 +366,8 @@ export default function AdminConsole() {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-mono">{user.id}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell className="font-medium">{user.username}</TableCell>
+                  <TableCell className="text-gray-600">{user.email}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {user.status === "active" ? (

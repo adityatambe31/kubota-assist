@@ -5,10 +5,10 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isAdminApiRoute = createRouteMatcher(["/api/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
+  const authData = await auth();
+
   // Protect admin routes
   if (isAdminRoute(req)) {
-    const authData = await auth();
-
     if (!authData.userId) {
       return Response.redirect(new URL("/sign-in", req.url));
     }

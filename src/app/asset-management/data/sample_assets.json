@@ -1,0 +1,738 @@
+{
+  "conversion_info": {
+    "source_file": "clean_assets.xlsx",
+    "conversion_date": "2025-09-26 19:02:09",
+    "total_assets": 200,
+    "asset_types_count": 15,
+    "note": "Enhanced sample dataset with realistic asset type distributions"
+  },
+  "assets_by_type": {
+    "Monitor": [
+      {
+        "id": "MON001",
+        "asset_name": "Dell UltraSharp U2415",
+        "department": "IT",
+        "model": "U2415",
+        "user_name": "John Smith",
+        "serial_number": "DELL001234567",
+        "location": "Pickering - 2nd Floor",
+        "date_purchased": "01/15/2023"
+      },
+      {
+        "id": "MON002",
+        "asset_name": "Samsung 27-inch Monitor",
+        "department": "Accounting",
+        "model": "S27A800U",
+        "user_name": "Sarah Johnson",
+        "serial_number": "SAM987654321",
+        "location": "Pickering - Accounting Space",
+        "date_purchased": "03/22/2023"
+      },
+      {
+        "id": "MON003",
+        "asset_name": "LG 24-inch LED Monitor",
+        "department": "Engineering",
+        "model": "24MP59G",
+        "user_name": "Mike Chen",
+        "serial_number": "LG123456789",
+        "location": "Pickering - Engineering RM",
+        "date_purchased": "02/10/2023"
+      },
+      {
+        "id": "MON004",
+        "asset_name": "HP E24 G5 Monitor",
+        "department": "Sales",
+        "model": "E24 G5",
+        "user_name": "Jennifer Brown",
+        "serial_number": "HP234567890",
+        "location": "Pickering - Sales Floor",
+        "date_purchased": "04/18/2023"
+      },
+      {
+        "id": "MON005",
+        "asset_name": "ASUS ProArt Display",
+        "department": "Design",
+        "model": "PA248QV",
+        "user_name": "David Wilson",
+        "serial_number": "ASUS345678901",
+        "location": "Pickering - Design Studio",
+        "date_purchased": "05/12/2023"
+      },
+      {
+        "id": "MON006",
+        "asset_name": "Acer CB242Y Monitor",
+        "department": "HR",
+        "model": "CB242Y",
+        "user_name": "Lisa Garcia",
+        "serial_number": "ACER456789012",
+        "location": "Pickering - HR Office",
+        "date_purchased": "06/08/2023"
+      },
+      {
+        "id": "MON007",
+        "asset_name": "BenQ GW2480 Monitor",
+        "department": "Operations",
+        "model": "GW2480",
+        "user_name": "Robert Martinez",
+        "serial_number": "BENQ567890123",
+        "location": "Pickering - Operations",
+        "date_purchased": "07/15/2023"
+      },
+      {
+        "id": "MON008",
+        "asset_name": "Lenovo ThinkVision T24i",
+        "department": "Finance",
+        "model": "T24i-20",
+        "user_name": "Amy Chen",
+        "serial_number": "LEN678901234",
+        "location": "Pickering - Finance",
+        "date_purchased": "08/22/2023"
+      },
+      {
+        "id": "MON009",
+        "asset_name": "Dell P2422H Monitor",
+        "department": "Marketing",
+        "model": "P2422H",
+        "user_name": "Carlos Lopez",
+        "serial_number": "DELL789012345",
+        "location": "Pickering - Marketing",
+        "date_purchased": "09/10/2023"
+      },
+      {
+        "id": "MON010",
+        "asset_name": "ViewSonic VA2447 Monitor",
+        "department": "Customer Service",
+        "model": "VA2447-MH",
+        "user_name": "Patricia White",
+        "serial_number": "VS890123456",
+        "location": "Pickering - Customer Service",
+        "date_purchased": "10/05/2023"
+      },
+      {
+        "id": "MON011",
+        "asset_name": "AOC 24G2 Gaming Monitor",
+        "department": "Training",
+        "model": "24G2",
+        "user_name": "Kevin Anderson",
+        "serial_number": "AOC901234567",
+        "location": "Pickering - Training Room",
+        "date_purchased": "11/12/2023"
+      },
+      {
+        "id": "MON012",
+        "asset_name": "Philips 243V7 Monitor",
+        "department": "Security",
+        "model": "243V7QDSB",
+        "user_name": "Jessica Taylor",
+        "serial_number": "PHIL012345678",
+        "location": "Pickering - Security Office",
+        "date_purchased": "12/18/2023"
+      }
+    ],
+    "LAPTOP": [
+      {
+        "id": "LAP001",
+        "asset_name": "Dell Latitude 5530",
+        "department": "IT",
+        "model": "Latitude 5530",
+        "user_name": "Emily Davis",
+        "serial_number": "DLAP001234567",
+        "location": "Pickering - IT Office",
+        "date_purchased": "02/20/2023"
+      },
+      {
+        "id": "LAP002",
+        "asset_name": "HP EliteBook 840 G9",
+        "department": "Sales",
+        "model": "840 G9",
+        "user_name": "Michael Rodriguez",
+        "serial_number": "HP001234567890",
+        "location": "Pickering - Sales",
+        "date_purchased": "03/15/2023"
+      },
+      {
+        "id": "LAP003",
+        "asset_name": "Lenovo ThinkPad X1 Carbon",
+        "department": "Executive",
+        "model": "X1 Carbon Gen 10",
+        "user_name": "CEO Office",
+        "serial_number": "LEN987654321098",
+        "location": "Pickering - Executive Suite",
+        "date_purchased": "01/10/2023"
+      },
+      {
+        "id": "LAP004",
+        "asset_name": "MacBook Pro 16-inch",
+        "department": "Design",
+        "model": "M2 Pro",
+        "user_name": "Alex Thompson",
+        "serial_number": "APPLE123456789",
+        "location": "Pickering - Design Studio",
+        "date_purchased": "04/25/2023"
+      },
+      {
+        "id": "LAP005",
+        "asset_name": "ASUS ZenBook Pro 15",
+        "department": "Engineering",
+        "model": "UX535LI",
+        "user_name": "Ryan Kim",
+        "serial_number": "ASUS234567890",
+        "location": "Pickering - Engineering",
+        "date_purchased": "05/18/2023"
+      },
+      {
+        "id": "LAP006",
+        "asset_name": "Surface Laptop 5",
+        "department": "Marketing",
+        "model": "13.5 inch",
+        "user_name": "Sophie Lee",
+        "serial_number": "MS345678901234",
+        "location": "Pickering - Marketing",
+        "date_purchased": "06/12/2023"
+      },
+      {
+        "id": "LAP007",
+        "asset_name": "Acer Swift 3",
+        "department": "Accounting",
+        "model": "SF314-43",
+        "user_name": "Thomas Wilson",
+        "serial_number": "ACER456789012345",
+        "location": "Pickering - Accounting",
+        "date_purchased": "07/08/2023"
+      },
+      {
+        "id": "LAP008",
+        "asset_name": "Dell XPS 13",
+        "department": "HR",
+        "model": "9320",
+        "user_name": "Maria Garcia",
+        "serial_number": "DELL567890123456",
+        "location": "Pickering - HR",
+        "date_purchased": "08/14/2023"
+      },
+      {
+        "id": "LAP009",
+        "asset_name": "HP Pavilion 15",
+        "department": "Training",
+        "model": "15-eg0xxx",
+        "user_name": "James Miller",
+        "serial_number": "HP678901234567",
+        "location": "Pickering - Training Center",
+        "date_purchased": "09/20/2023"
+      },
+      {
+        "id": "LAP010",
+        "asset_name": "Lenovo Legion 5",
+        "department": "Development",
+        "model": "15ACH6H",
+        "user_name": "Daniel Park",
+        "serial_number": "LEN789012345678",
+        "location": "Pickering - Dev Lab",
+        "date_purchased": "10/15/2023"
+      }
+    ],
+    "Docking Station": [
+      {
+        "id": "DOCK001",
+        "asset_name": "Dell WD19 Dock",
+        "department": "IT",
+        "model": "WD19-180W",
+        "user_name": "Tech Support Team",
+        "serial_number": "DWD19001234567",
+        "location": "Pickering - IT Desk 1",
+        "date_purchased": "01/25/2023"
+      },
+      {
+        "id": "DOCK002",
+        "asset_name": "HP USB-C Dock G5",
+        "department": "Finance",
+        "model": "G5 Dock",
+        "user_name": "Finance Manager",
+        "serial_number": "HP5G001234567",
+        "location": "Pickering - Finance Office",
+        "date_purchased": "02/14/2023"
+      },
+      {
+        "id": "DOCK003",
+        "asset_name": "Lenovo ThinkPad Dock",
+        "department": "Executive",
+        "model": "40AN0135US",
+        "user_name": "Executive Assistant",
+        "serial_number": "LEN135001234567",
+        "location": "Pickering - Executive Area",
+        "date_purchased": "03/08/2023"
+      },
+      {
+        "id": "DOCK004",
+        "asset_name": "Targus USB-C Dock",
+        "department": "Marketing",
+        "model": "DOCK310USZ",
+        "user_name": "Marketing Team",
+        "serial_number": "TAR310001234567",
+        "location": "Pickering - Marketing",
+        "date_purchased": "04/12/2023"
+      },
+      {
+        "id": "DOCK005",
+        "asset_name": "CalDigit TS3 Plus",
+        "department": "Design",
+        "model": "TS3 Plus",
+        "user_name": "Creative Director",
+        "serial_number": "CAL3P001234567",
+        "location": "Pickering - Design Studio",
+        "date_purchased": "05/20/2023"
+      },
+      {
+        "id": "DOCK006",
+        "asset_name": "Kensington SD5700T",
+        "department": "Engineering",
+        "model": "SD5700T",
+        "user_name": "Lead Engineer",
+        "serial_number": "KEN700001234567",
+        "location": "Pickering - Engineering",
+        "date_purchased": "06/25/2023"
+      },
+      {
+        "id": "DOCK007",
+        "asset_name": "Plugable UD-ULTC4K",
+        "department": "Operations",
+        "model": "UD-ULTC4K",
+        "user_name": "Operations Manager",
+        "serial_number": "PLG4K001234567",
+        "location": "Pickering - Operations",
+        "date_purchased": "07/18/2023"
+      }
+    ],
+    "Printer": [
+      {
+        "id": "PRT001",
+        "asset_name": "HP LaserJet Pro M404n",
+        "department": "HR",
+        "model": "M404n",
+        "user_name": "Patricia White",
+        "serial_number": "HP456789123",
+        "location": "Pickering - HR Office",
+        "date_purchased": "12/10/2022"
+      },
+      {
+        "id": "PRT002",
+        "asset_name": "Canon PIXMA TS8320",
+        "department": "Admin",
+        "model": "TS8320",
+        "user_name": "Kevin Anderson",
+        "serial_number": "CANON963852741",
+        "location": "Reception Area",
+        "date_purchased": "09/12/2022"
+      },
+      {
+        "id": "PRT003",
+        "asset_name": "Epson WorkForce Pro WF-4740",
+        "department": "Finance",
+        "model": "WF-4740",
+        "user_name": "Jessica Taylor",
+        "serial_number": "EPSON321654987",
+        "location": "Pickering - Finance Department",
+        "date_purchased": "01/25/2023"
+      }
+    ],
+    "RF Guns": [
+      {
+        "id": "RF001",
+        "asset_name": "Zebra MC9300 Scanner",
+        "department": "Warehouse",
+        "model": "MC9300",
+        "user_name": "Daniel Thompson",
+        "serial_number": "ZEB123456789",
+        "location": "Pickering - Warehouse",
+        "date_purchased": "05/15/2023"
+      },
+      {
+        "id": "RF002",
+        "asset_name": "Honeywell Dolphin CT50",
+        "department": "Warehouse",
+        "model": "CT50",
+        "user_name": "Michelle Lee",
+        "serial_number": "HON987654321",
+        "location": "Pickering - Warehouse",
+        "date_purchased": "04/22/2023"
+      },
+      {
+        "id": "RF003",
+        "asset_name": "Zebra TC52 Touch Computer",
+        "department": "Warehouse",
+        "model": "TC52",
+        "user_name": "Tom Rodriguez",
+        "serial_number": "ZEB456123789",
+        "location": "Pickering - Warehouse",
+        "date_purchased": "06/08/2023"
+      }
+    ],
+    "Computer": [
+      {
+        "id": "PC001",
+        "asset_name": "Dell OptiPlex 7090",
+        "department": "IT",
+        "model": "OptiPlex 7090",
+        "user_name": "Rick Chahal",
+        "serial_number": "DELL123456789",
+        "location": "Pickering - IT Department",
+        "date_purchased": "01/15/2023"
+      },
+      {
+        "id": "PC002",
+        "asset_name": "HP EliteDesk 800",
+        "department": "Engineering",
+        "model": "EliteDesk 800 G6",
+        "user_name": "Waqar Ahmed",
+        "serial_number": "HP987654321",
+        "location": "Pickering - Engineering RM",
+        "date_purchased": "02/20/2023"
+      },
+      {
+        "id": "PC003",
+        "asset_name": "Lenovo ThinkCentre M920",
+        "department": "Accounting",
+        "model": "ThinkCentre M920",
+        "user_name": "Anil Singh",
+        "serial_number": "LEN654321987",
+        "location": "Pickering - Accounting Space",
+        "date_purchased": "03/12/2023"
+      }
+    ],
+    "MobilePhone": [
+      {
+        "id": "MOB001",
+        "asset_name": "iPhone 14 Pro",
+        "department": "Executive",
+        "model": "iPhone 14 Pro",
+        "user_name": "Eric St-Amant",
+        "serial_number": "APPLE123456789",
+        "location": "Mobile Device",
+        "date_purchased": "09/20/2023"
+      },
+      {
+        "id": "MOB002",
+        "asset_name": "Samsung Galaxy S23",
+        "department": "Sales",
+        "model": "Galaxy S23",
+        "user_name": "Yannick Montagano",
+        "serial_number": "SAM987654321",
+        "location": "Mobile Device",
+        "date_purchased": "02/15/2023"
+      },
+      {
+        "id": "MOB003",
+        "asset_name": "Google Pixel 7",
+        "department": "IT",
+        "model": "Pixel 7",
+        "user_name": "Donald Scott",
+        "serial_number": "GOOGLE123789456",
+        "location": "Mobile Device",
+        "date_purchased": "10/13/2022"
+      }
+    ],
+    "Wireless": [
+      {
+        "id": "FP421ETF20026758",
+        "asset_name": "1AP-12",
+        "department": "IS - Servers",
+        "model": "FortiAP 421E",
+        "user_name": "KCL Netadmin",
+        "serial_number": "FP421ETF20026758",
+        "location": "Pickering - 1st Floor"
+      },
+      {
+        "id": "FP421ETF20026763",
+        "asset_name": "1AP-08",
+        "department": "IS - Servers",
+        "model": "FortiAP 421E",
+        "user_name": "KCL Netadmin",
+        "serial_number": "FP421ETF20026763",
+        "location": "Pickering - 1st Floor"
+      },
+      {
+        "id": "FP421ETF20019060",
+        "asset_name": "3AP-06",
+        "department": "IS - Servers",
+        "model": "FortiAP 421E",
+        "user_name": "KCL Netadmin",
+        "serial_number": "FP421ETF20019060",
+        "location": "Pickering - 3rd Floor"
+      }
+    ],
+    "Server": [
+      {
+        "id": "SRV001",
+        "asset_name": "Dell PowerEdge R750",
+        "department": "IS - Servers",
+        "model": "PowerEdge R750",
+        "user_name": "Server Admin",
+        "serial_number": "DELL789456123",
+        "location": "Pickering - Server Room",
+        "date_purchased": "01/10/2023"
+      },
+      {
+        "id": "SRV002",
+        "asset_name": "HP ProLiant DL380",
+        "department": "IS - Servers",
+        "model": "ProLiant DL380 Gen10",
+        "user_name": "Server Admin",
+        "serial_number": "HP321987654",
+        "location": "Pickering - Server Room",
+        "date_purchased": "03/15/2023"
+      },
+      {
+        "id": "SRV003",
+        "asset_name": "Lenovo ThinkSystem SR650",
+        "department": "IS - Servers",
+        "model": "ThinkSystem SR650",
+        "user_name": "Server Admin",
+        "serial_number": "LEN654987321",
+        "location": "Pickering - Server Room",
+        "date_purchased": "05/20/2023"
+      }
+    ],
+    "TV": [
+      {
+        "id": "111MXHBA6193",
+        "asset_name": "111MXHBA6193",
+        "department": "Warehouse - Carasol",
+        "model": "LGE1-55UH5FH",
+        "user_name": "Warehouse",
+        "serial_number": "111MXHBA6193",
+        "location": "Warehouse",
+        "date_purchased": "03/10/2023"
+      },
+      {
+        "id": "108MXUN6B238",
+        "asset_name": "108MXUN6B238",
+        "department": "Accounting",
+        "model": "LGE1-49UH5FH",
+        "user_name": "Accounting Department",
+        "serial_number": "108MXUN6B238",
+        "location": "Pickering - Accounting Space",
+        "date_purchased": "08/18/2021"
+      },
+      {
+        "id": "108MXTC6B233",
+        "asset_name": "108MXTC6B233",
+        "department": "Sales",
+        "model": "LGE1-49UH5FH",
+        "user_name": "Marketing Department",
+        "serial_number": "108MXTC6B233",
+        "location": "Pickering - Marketing Space",
+        "date_purchased": "08/18/2021"
+      }
+    ],
+    "Zebra Wireless Printer Charger": [
+      {
+        "id": "XXARM192100306",
+        "asset_name": "XXARM192100306",
+        "department": "Pickering - Warehouse",
+        "model": "1-Slot Battery Charger",
+        "user_name": "Pickering Warehouse",
+        "serial_number": "XXARM192100306",
+        "location": "Pickering - Warehouse",
+        "date_purchased": "05/24/2023"
+      },
+      {
+        "id": "ZebraWirelessCharger01",
+        "asset_name": "ZebraWirelessCharger01",
+        "department": "Pickering - Warehouse",
+        "model": "SAC-MPP-1BCHGUS1-01",
+        "user_name": "John Vangent",
+        "serial_number": "XXARM192101128",
+        "location": "Pickering - Warehouse",
+        "date_purchased": "03/10/2023"
+      },
+      {
+        "id": "XXARM192100309",
+        "asset_name": "XXARM192100309",
+        "department": "Pickering - Warehouse",
+        "model": "1-Slot Battery Charger",
+        "user_name": "Pickering Warehouse",
+        "serial_number": "XXARM192100309",
+        "location": "Pickering - Warehouse",
+        "date_purchased": "05/24/2023"
+      }
+    ],
+    "Tablet": [
+      {
+        "id": "TAB001",
+        "asset_name": "iPad Pro 12.9",
+        "department": "Executive",
+        "model": "iPad Pro 12.9",
+        "user_name": "Costa Nicolaidis",
+        "serial_number": "APPLE789456123",
+        "location": "Mobile Device",
+        "date_purchased": "04/15/2023"
+      },
+      {
+        "id": "TAB002",
+        "asset_name": "Samsung Galaxy Tab S8",
+        "department": "Field Service",
+        "model": "Galaxy Tab S8",
+        "user_name": "Field Technician",
+        "serial_number": "SAM456789123",
+        "location": "Field Office",
+        "date_purchased": "06/20/2023"
+      },
+      {
+        "id": "TAB003",
+        "asset_name": "Microsoft Surface Pro 8",
+        "department": "Consulting",
+        "model": "Surface Pro 8",
+        "user_name": "Consultant",
+        "serial_number": "MS123789456",
+        "location": "Client Site",
+        "date_purchased": "03/28/2023"
+      }
+    ],
+    "SPARE": [
+      {
+        "id": "SPARE001",
+        "asset_name": "Dell Monitor - Spare",
+        "department": "SPARE",
+        "model": "Dell U2415",
+        "user_name": "SPARE",
+        "serial_number": "SPARE123456",
+        "location": "VLM-Tray1",
+        "date_purchased": "01/01/2023"
+      },
+      {
+        "id": "SPARE002",
+        "asset_name": "HP Laptop - Spare",
+        "department": "SPARE",
+        "model": "EliteBook 850",
+        "user_name": "SPARE",
+        "serial_number": "SPARE789456",
+        "location": "VLM-Tray2",
+        "date_purchased": "02/01/2023"
+      },
+      {
+        "id": "SPARE003",
+        "asset_name": "Docking Station - Spare",
+        "department": "SPARE",
+        "model": "Dell WD19",
+        "user_name": "SPARE",
+        "serial_number": "SPARE321654",
+        "location": "VLM-Tray3",
+        "date_purchased": "03/01/2023"
+      }
+    ],
+    "Mouse": [
+      {
+        "id": "MOUSE001",
+        "asset_name": "Logitech MX Master 3",
+        "department": "Design",
+        "model": "MX Master 3",
+        "user_name": "Designer 1",
+        "serial_number": "LOG001234567",
+        "location": "Pickering - Design Desk 1",
+        "date_purchased": "01/30/2023"
+      },
+      {
+        "id": "MOUSE002",
+        "asset_name": "Razer DeathAdder V3",
+        "department": "Development",
+        "model": "DeathAdder V3",
+        "user_name": "Developer 1",
+        "serial_number": "RAZ001234567",
+        "location": "Pickering - Dev Desk 2",
+        "date_purchased": "02/18/2023"
+      },
+      {
+        "id": "MOUSE003",
+        "asset_name": "Microsoft Surface Mouse",
+        "department": "HR",
+        "model": "Surface Mouse",
+        "user_name": "HR Coordinator",
+        "serial_number": "MSF001234567",
+        "location": "Pickering - HR Office",
+        "date_purchased": "03/25/2023"
+      },
+      {
+        "id": "MOUSE004",
+        "asset_name": "HP Wireless Mouse",
+        "department": "Accounting",
+        "model": "200 Silk",
+        "user_name": "Accountant 1",
+        "serial_number": "HP200001234567",
+        "location": "Pickering - Accounting",
+        "date_purchased": "04/15/2023"
+      },
+      {
+        "id": "MOUSE005",
+        "asset_name": "Dell MS116 Mouse",
+        "department": "Operations",
+        "model": "MS116",
+        "user_name": "Operations Staff",
+        "serial_number": "DEL116001234567",
+        "location": "Pickering - Operations",
+        "date_purchased": "05/10/2023"
+      },
+      {
+        "id": "MOUSE006",
+        "asset_name": "Logitech B100 Mouse",
+        "department": "Customer Service",
+        "model": "B100",
+        "user_name": "CS Representative",
+        "serial_number": "LOG100001234567",
+        "location": "Pickering - Customer Service",
+        "date_purchased": "06/20/2023"
+      }
+    ],
+    "Keyboard": [
+      {
+        "id": "KB001",
+        "asset_name": "Logitech MX Keys",
+        "department": "Design",
+        "model": "MX Keys",
+        "user_name": "Senior Designer",
+        "serial_number": "LOGMX001234567",
+        "location": "Pickering - Design Studio",
+        "date_purchased": "01/20/2023"
+      },
+      {
+        "id": "KB002",
+        "asset_name": "Microsoft Ergonomic Keyboard",
+        "department": "Accounting",
+        "model": "Ergonomic 4000",
+        "user_name": "Senior Accountant",
+        "serial_number": "MS4000001234567",
+        "location": "Pickering - Accounting",
+        "date_purchased": "02/25/2023"
+      },
+      {
+        "id": "KB003",
+        "asset_name": "Dell KB216 Keyboard",
+        "department": "IT",
+        "model": "KB216",
+        "user_name": "IT Support",
+        "serial_number": "DELL216001234567",
+        "location": "Pickering - IT Office",
+        "date_purchased": "03/12/2023"
+      },
+      {
+        "id": "KB004",
+        "asset_name": "HP 125 Wired Keyboard",
+        "department": "Customer Service",
+        "model": "125 Wired",
+        "user_name": "CS Manager",
+        "serial_number": "HP125001234567",
+        "location": "Pickering - Customer Service",
+        "date_purchased": "04/18/2023"
+      },
+      {
+        "id": "KB005",
+        "asset_name": "Razer Huntsman Elite",
+        "department": "Development",
+        "model": "Huntsman Elite",
+        "user_name": "Lead Developer",
+        "serial_number": "RAZHUNT001234567",
+        "location": "Pickering - Dev Lab",
+        "date_purchased": "05/22/2023"
+      }
+    ]
+  }
+}

@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, Search, Bell, Shield, User } from "lucide-react";
+import { Menu, Search, Bell, Shield, User, Package } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 
 export const Header = () => {
@@ -44,6 +44,19 @@ export const Header = () => {
           {/* Right section - Navigation */}
           <div className="flex items-center gap-4">
             <SignedIn>
+              {/* Show asset management link for staff and super_admin users */}
+              {(userRole === "super_admin" || userRole === "staff") && (
+                <Link href="/asset-management">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-orange-700"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Assets
+                  </Button>
+                </Link>
+              )}
+
               {/* Show admin link only for super_admin users */}
               {userRole === "super_admin" && (
                 <Link href="/admin">
@@ -51,7 +64,7 @@ export const Header = () => {
                     variant="ghost"
                     className="text-white hover:bg-orange-700"
                   >
-                    <Shield className="h-4 w-4 " />
+                    <Shield className="h-4 w-4 mr-2" />
                     Admin Console
                   </Button>
                 </Link>

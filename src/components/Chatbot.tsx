@@ -15,23 +15,30 @@ import { type HandbookEntry } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 export function ChatBot() {
-  const { messages, addMessage, updateActivity, generateTicketData } =
-    useChat();
+  const {
+    messages,
+    addMessage,
+    updateActivity,
+    generateTicketData,
+    initialize,
+    isInitialized,
+    clearMessages,
+  } = useChat();
   const [input, setInput] = useState("");
   const [showTooltip, setShowTooltip] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  // Initialize chat on first render
+  // Initialize chat on first render - only once
   useEffect(() => {
-    if (messages.length === 0) {
-      addMessage({
-        role: "bot",
-        content:
-          "👋 Hi, I'm here to help. Please select the issue that best matches your problem:",
-      });
+    let mounted = true;
+    if (!isInitialized && mounted) {
+      initialize();
     }
-  }, [messages.length, addMessage]);
+    return () => {
+      mounted = false;
+    };
+  }, [isInitialized, initialize]);
 
   // Main prompts data
   const mainPrompts = [
@@ -247,6 +254,17 @@ export function ChatBot() {
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs text-white hover:bg-orange-500/20"
+                  onClick={() => {
+                    clearMessages();
+                    setTimeout(() => initialize(), 100);
+                  }}
+                >
+                  Reset
+                </Button>
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="h-8 w-8 rounded-full text-white hover:bg-orange-500/20"
                   asChild
@@ -268,7 +286,7 @@ export function ChatBot() {
 
             {/* Messages */}
             <div className="flex-1 p-4 overflow-y-auto space-y-5">
-              {messages.length <= 1 ? (
+              {messages.length === 1 && messages[0]?.role === "bot" ? (
                 <div className="space-y-5">
                   {messages.map((msg, i) => (
                     <div key={i} className="flex items-start gap-3">
@@ -289,9 +307,44 @@ export function ChatBot() {
                         variant="outline"
                         className="w-full justify-start text-left hover:bg-orange-50 hover:border-orange-200 transition-colors"
                         onClick={async () => {
-                          setInput(prompt.title);
-                          await handleSubmit(new Event("submit") as any);
+                          const userMessage: ChatMessage = {
+                            role: "user",
+                            content: prompt.title,
+                          };
+
+                          addMessage(userMessage);
                           updateActivity();
+                          setIsLoading(true);
+
+                          const updatedContext = [...messages, userMessage];
+
+                          try {
+                            const response = await fetch("/api/chat", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                message: prompt.title,
+                                context: updatedContext,
+                              }),
+                            });
+
+                            const data = await response.json();
+                            addMessage({
+                              role: "bot",
+                              content: data.message,
+                              solutions: data.solutions,
+                            });
+                            updateActivity();
+                          } catch (error) {
+                            console.error("Chat Error:", error);
+                            addMessage({
+                              role: "bot",
+                              content:
+                                "I'm sorry, I encountered an error. Please try again.",
+                            });
+                          } finally {
+                            setIsLoading(false);
+                          }
                         }}
                       >
                         <span className="mr-3 text-xl">{prompt.icon}</span>

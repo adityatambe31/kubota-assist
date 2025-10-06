@@ -1,14 +1,23 @@
-import OpenAI from "openai";
-import { HandbookEntry } from "./types";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { HandbookEntry } from "../../types/global";
 import { GEMINI_SYSTEM_PROMPT } from "./prompts";
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY is not set in environment variables");
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY is not set in environment variables");
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+// Initialize the model
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+// Use the working model (the old reliable one)
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.0-pro", // This one actually works!
+  generationConfig: {
+    maxOutputTokens: 1024,
+    temperature: 0.7,
+    topP: 0.8,
+    topK: 40,
+  },
 });
 
 // Simple fallback when AI fails
@@ -58,32 +67,8 @@ ${
 
 Please provide a helpful response.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: GEMINI_SYSTEM_PROMPT,
-        },
-        {
-          role: "user",
-          content: `USER QUERY: ${query}
-
-${
-  formattedSolutions.length > 0
-    ? `DATABASE SOLUTIONS:\n${formattedSolutions.join("\n\n")}`
-    : "NO_SOLUTIONS_FOUND"
-}
-
-Please provide a helpful response.`,
-        },
-      ],
-      max_tokens: 1024,
-      temperature: 0.7,
-      top_p: 0.8,
-    });
-
-    const response = completion.choices[0]?.message?.content || "";
+    const result = await model.generateContent(prompt);
+    const response = await result.response.text();
 
     return {
       message: response,
@@ -91,7 +76,7 @@ Please provide a helpful response.`,
       enhancedSolutions: solutions,
     };
   } catch (error: any) {
-    console.error("OpenAI error:", error);
+    console.error("Gemini error:", error);
 
     // Use fallback for any error
     return {
@@ -102,7 +87,7 @@ Please provide a helpful response.`,
   }
 }
 
-export async function explainSolution(
+export async function explainSolutionWithGemini(
   query: string,
   solutions: HandbookEntry[],
   context?: { role: string; content: string }[]
@@ -125,38 +110,28 @@ ${formattedSolutions.join("\n\n")}
 
 Please provide clear, step-by-step instructions.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 1024,
-      temperature: 0.7,
-      top_p: 0.8,
-    });
-
-    return (
-      completion.choices[0]?.message?.content ||
-      createFallback(query, solutions)
-    );
+    const result = await model.generateContent(prompt);
+    const response = await result.response.text();
+    return response;
   } catch (error: any) {
-    console.error("OpenAI explainSolution error:", error);
+    console.error("Gemini explainSolution error:", error);
 
     // Always use fallback on any error
     return createFallback(query, solutions);
   }
 }
 
-export async function* streamExplanation(
+export async function* streamExplanationWithGemini(
   query: string,
   solutions: HandbookEntry[],
   context?: { role: string; content: string }[]
 ) {
   try {
-    const explanation = await explainSolution(query, solutions, context);
+    const explanation = await explainSolutionWithGemini(
+      query,
+      solutions,
+      context
+    );
     yield explanation;
   } catch (error) {
     console.error("Streaming error:", error);

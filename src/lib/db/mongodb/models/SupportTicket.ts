@@ -1,14 +1,5 @@
 import mongoose from "mongoose";
-
-// Encrypted data structure for secure storage
-interface EncryptedData {
-  encrypted: string; // Base64 encoded encrypted content
-  keyId: string; // KMS key ARN or ID
-  algorithm: string; // Encryption algorithm used
-  iv: string; // Base64 encoded initialization vector
-  authTag?: string; // Base64 encoded authentication tag
-  dataKeyEncrypted: string; // Base64 encoded encrypted data key
-}
+import { EncryptedData } from "../../../../types/db";
 
 export interface ISupportTicket {
   ticketId: string;

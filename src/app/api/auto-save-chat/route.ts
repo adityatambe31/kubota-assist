@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import autoSaveChatService from "@/lib/services/AutoSaveChatService";
+import autoSaveChatService from "@/lib/store/autoSaveChatService";
 import { ChatMessage } from "@/hooks/use-chat";
 
 /**

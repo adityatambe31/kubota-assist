@@ -1,4 +1,4 @@
-import chatEncryptionService from "@/lib/services/ChatEncryptionService";
+import chatEncryptionService from "../security/awsEncryption";
 import { ChatMessage } from "@/hooks/use-chat";
 
 /**

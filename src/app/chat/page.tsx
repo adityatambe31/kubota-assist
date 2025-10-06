@@ -3,8 +3,9 @@ import { useState, useRef } from "react";
 import { Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
-import { type HandbookEntry } from "@/lib/types";
+import { type HandbookEntry } from "@/types/global";
 import { useRouter } from "next/navigation";
+import { MAIN_SUPPORT_CATEGORIES } from "@/utils/supportCategories";
 
 export default function ChatPage() {
   const { messages, addMessage, updateActivity } = useChat();
@@ -16,19 +17,7 @@ export default function ChatPage() {
   const [feedbackRequested, setFeedbackRequested] = useState(false);
 
   // Main prompts data
-  const mainPrompts = [
-    { icon: "🔑", title: "Login / Password Reset" },
-    { icon: "💻", title: "New Laptop / Hardware / Software Request" },
-    { icon: "🌐", title: "VPN / Remote Access" },
-    {
-      icon: "📂",
-      title: "Application Issues (AS400, DealerLink, IBM Notes, etc.)",
-    },
-    { icon: "📧", title: "Email / Outlook" },
-    { icon: "🖨️", title: "Printer / Peripheral" },
-    { icon: "📞", title: "Microsoft Teams / Phone" },
-    { icon: "🔄", title: "Windows Updates / System Performance" },
-  ];
+  const mainPrompts = MAIN_SUPPORT_CATEGORIES;
 
   const PromptMenu = ({ onSelect }: { onSelect: (prompt: string) => void }) => (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">

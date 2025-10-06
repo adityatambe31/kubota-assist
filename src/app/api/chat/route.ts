@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import { SUPPORT_PROMPTS } from "@/lib/prompts";
-import { TicketType } from "@/lib/types";
-import { searchSolutions } from "@/lib/mongodb";
-import { explainSolution } from "@/lib/openai";
-import autoSaveChatService from "@/lib/services/AutoSaveChatService";
+import { connectDB } from "@/lib/db/mongodb/connection";
+import { searchSolutions } from "@/lib/db/mongodb/queries";
+import { SUPPORT_PROMPTS } from "@/lib/ai/prompts";
+import { TicketType } from "@/types/global";
+import { explainSolution } from "@/lib/ai";
+import autoSaveChatService from "@/lib/store/autoSaveChatService";
 
 export async function POST(req: Request) {
   try {
@@ -15,10 +15,6 @@ export async function POST(req: Request) {
     const currentSessionId =
       sessionId ||
       `chat_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-    console.log(`💬 Processing chat for session: ${currentSessionId}`);
-    console.log(`📝 Message: "${message}"`);
-    console.log(`🔗 Context length: ${context.length}`);
 
     // Initial category selection
     if (context.length === 0) {
@@ -78,17 +74,13 @@ export async function POST(req: Request) {
 
       // Auto-save the conversation in encrypted format
       try {
-        console.log(
-          `🔐 Auto-saving encrypted conversation for session: ${currentSessionId}`
-        );
         await autoSaveChatService.saveCompletedChatSession(chatMessages, {
           sessionId: currentSessionId,
           category: category || "general-support",
           resolved: true, // Mark as resolved since we provided solutions
         });
-        console.log(`✅ Conversation encrypted and saved to MongoDB!`);
       } catch (saveError) {
-        console.error("❌ Failed to save encrypted conversation:", saveError);
+        console.error("Failed to save encrypted conversation:", saveError);
         // Don't fail the main response if saving fails
       }
 
@@ -113,17 +105,13 @@ export async function POST(req: Request) {
 
     // Auto-save unresolved conversation
     try {
-      console.log(
-        `🔐 Auto-saving unresolved conversation for session: ${currentSessionId}`
-      );
       await autoSaveChatService.saveCompletedChatSession(chatMessages, {
         sessionId: currentSessionId,
         category: category || "unresolved",
         resolved: false, // Mark as unresolved
       });
-      console.log(`✅ Unresolved conversation encrypted and saved!`);
     } catch (saveError) {
-      console.error("❌ Failed to save unresolved conversation:", saveError);
+      console.error("Failed to save unresolved conversation:", saveError);
     }
 
     return NextResponse.json({

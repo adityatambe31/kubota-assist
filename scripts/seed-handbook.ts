@@ -61,7 +61,9 @@ async function seedHandbook() {
     },
   ];
 
-  await collection.insertMany(entries);
+  // Remove _id to let MongoDB auto-generate
+  const entriesWithoutId = entries.map(({ _id, ...entry }) => entry);
+  await collection.insertMany(entriesWithoutId);
   console.log("Handbook data seeded successfully!");
 
   await client.close();

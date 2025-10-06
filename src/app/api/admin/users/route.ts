@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/nextjs/server";
-import { getUserDisplayName } from "@/lib/utils";
+import { getUserDisplayName } from "@/utils/userHelpers";
 
 // Mock user data - In a real app, this would be in a database
 let users = [

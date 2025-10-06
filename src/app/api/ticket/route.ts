@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import { SupportTicket } from "@/lib/models/SupportTicket";
-import { jiraService } from "@/lib/jira";
-import chatEncryptionService from "@/lib/services/ChatEncryptionService";
+import { connectDB } from "@/lib/db/mongodb/connection";
+import { SupportTicket } from "@/lib/db/mongodb/models/SupportTicket";
+import { jiraService } from "@/lib/db/jira/client";
+import chatEncryptionService from "@/lib/security/awsEncryption";
 
 export async function POST(req: NextRequest) {
   try {

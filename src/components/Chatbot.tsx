@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Send, X, Maximize2, Bot, User } from "lucide-react";
 import Image from "next/image";
 import { useChat, type ChatMessage } from "@/hooks/use-chat";
-import { type HandbookEntry } from "@/lib/types";
+import { type HandbookEntry } from "@/types/global";
+import { MAIN_SUPPORT_CATEGORIES } from "@/utils/supportCategories";
 import { useRouter } from "next/navigation";
 
 export function ChatBot() {
@@ -34,19 +35,7 @@ export function ChatBot() {
   }, [messages.length, addMessage]);
 
   // Main prompts data
-  const mainPrompts = [
-    { icon: "🔑", title: "Login / Password Reset" },
-    { icon: "💻", title: "New Laptop / Hardware / Software Request" },
-    { icon: "🌐", title: "VPN / Remote Access" },
-    {
-      icon: "📂",
-      title: "Application Issues (AS400, DealerLink, IBM Notes, etc.)",
-    },
-    { icon: "📧", title: "Email / Outlook" },
-    { icon: "🖨️", title: "Printer / Peripheral" },
-    { icon: "📞", title: "Microsoft Teams / Phone" },
-    { icon: "🔄", title: "Windows Updates / System Performance" },
-  ];
+  const mainPrompts = MAIN_SUPPORT_CATEGORIES;
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);

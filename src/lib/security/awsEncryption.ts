@@ -1,8 +1,8 @@
 import EncryptedConvo, {
   IEncryptedMessage,
   IEncryptedConvo,
-} from "@/lib/models/EncryptedConvo";
-import { connectDB } from "@/lib/mongodb";
+} from "../db/mongodb/models/EncryptedConvo";
+import { connectDB } from "../db/mongodb/connection";
 import crypto from "crypto";
 import { KMSClient, EncryptCommand, DecryptCommand } from "@aws-sdk/client-kms";
 

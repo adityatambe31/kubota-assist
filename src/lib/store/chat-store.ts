@@ -2,6 +2,10 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { ChatMessage } from "@/hooks/use-chat";
 
+/**
+ * Chat state management for IT support conversations
+ * Handles message storage, session tracking, and persistence
+ */
 interface ChatState {
   messages: ChatMessage[];
   lastActivity: number;
@@ -14,7 +18,7 @@ interface ChatState {
   isSessionValid: () => boolean;
 }
 
-const SESSION_TIMEOUT = 1000 * 60 * 1; // 1 minute for testing
+const SESSION_TIMEOUT = 1000 * 60 * 30; // 30 minutes session timeout
 
 export const useChatStore = create(
   persist<ChatState>(

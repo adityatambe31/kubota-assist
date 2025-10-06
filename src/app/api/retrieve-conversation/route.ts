@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import chatEncryptionService from "@/lib/services/ChatEncryptionService";
+import chatEncryptionService from "@/lib/security/awsEncryption";
 
 export async function POST(request: NextRequest) {
   try {

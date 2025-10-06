@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserX, Shield, Settings, Users } from "lucide-react";
-import { getUserDisplayName } from "@/lib/utils";
+import { getUserDisplayName } from "@/utils/userHelpers";
 
 // Types
 type UserRole = "end_user" | "staff" | "super_admin";

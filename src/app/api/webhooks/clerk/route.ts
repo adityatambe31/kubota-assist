@@ -1,8 +1,15 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
+import { withErrorHandling, logApiRequest } from "@/lib/api/handleError";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+} from "@/lib/api/responses";
 
-export async function POST(req: Request) {
+export const POST = withErrorHandling(async (req: Request) => {
+  logApiRequest("POST", "/api/webhooks/clerk");
+
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
@@ -20,9 +27,7 @@ export async function POST(req: Request) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Error occured -- no svix headers", {
-      status: 400,
-    });
+    return createErrorResponse("Missing svix headers", 400, "MISSING_HEADERS");
   }
 
   // Get the body
@@ -43,35 +48,45 @@ export async function POST(req: Request) {
     }) as WebhookEvent;
   } catch (err) {
     console.error("Error verifying webhook:", err);
-    return new Response("Error occured", {
-      status: 400,
-    });
+    return createErrorResponse(
+      "Webhook verification failed",
+      400,
+      "VERIFICATION_FAILED"
+    );
   }
 
   // Handle the webhook
   const { id } = evt.data;
   const eventType = evt.type;
 
-  console.log(`Webhook with an ID of ${id} and type of ${eventType}`);
+  console.log(`🔗 Webhook received: ID=${id}, Type=${eventType}`);
 
   // Handle different event types
   switch (eventType) {
     case "user.created":
-      console.log("User created:", evt.data);
+      console.log("👤 User created:", evt.data);
       // Set default role for new users
       break;
 
     case "user.updated":
-      console.log("User updated:", evt.data);
+      console.log("📝 User updated:", evt.data);
       break;
 
     case "user.deleted":
-      console.log("User deleted:", evt.data);
+      console.log("🗑️ User deleted:", evt.data);
       break;
 
     default:
-      console.log(`Unhandled event type: ${eventType}`);
+      console.log(`❓ Unhandled event type: ${eventType}`);
   }
 
-  return new Response("", { status: 200 });
-}
+  const responseData = {
+    processed: true,
+    eventType,
+    eventId: id,
+  };
+
+  return createSuccessResponse(responseData, 200, {
+    message: "Webhook processed successfully",
+  });
+});

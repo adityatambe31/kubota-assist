@@ -24,7 +24,7 @@
     "mime": "^4.1.0",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
-    "next": "^15.5.2",
+    "next": "^15.5.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "snowflake-sdk": "^2.2.0",
